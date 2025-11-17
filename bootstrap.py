@@ -102,9 +102,10 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    kEff = effectiveNumberTests(maxStats, alpha, K)
-
     tStats, pVals = computeTestStatistics(data) #  test statistics on original data
+    K = len(tStats)
+
+    kEff = effectiveNumberTests(maxStats, alpha, K)
 
     rejected = np.abs(tStats) > tStar
     performance = measurePerformance(rejected, isTrue)
@@ -187,11 +188,18 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
         results['Bootstrap-Single']['kEff'].append(performanceBoot['kEff'])
 
 
-        performanceRW, _, _ = romanoWolfStepdown(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+        performanceRW, _, _ = applyRomanoWolfBootstrapCalibration(
+            data,
+            clusterLabels,
+            isTrue,
+            alpha,
+            blockLength,
+            numberBootstrap,
+        )
         results['Bootstrap-RomanoWolf']['fwer'].append(performanceRW['fwer'])
         results['Bootstrap-RomanoWolf']['fdr'].append(performanceRW['fdr'])
         results['Bootstrap-RomanoWolf']['power'].append(performanceRW['power'])
-        results['Bootstrap-RomanoWolf']['kEff'].append(perfRW['kEff'])
+        results['Bootstrap-RomanoWolf']['kEff'].append(performanceRW['kEff'])
 
 
     summary = {}
@@ -240,7 +248,7 @@ def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time,
             summary[method]['scenario'] = f'phi={phi}'
             summary[method]['varied_param'] = 'phi'
             summary[method]['phi'] = phi
-            summary[method]['rho'] = 0.5
+            summary[method]['rho'] = baseRho
 
         allResults.append(summary)
 
@@ -252,11 +260,11 @@ def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time,
             alpha=alpha,
             numberBootstrap=numberBootstrap,
             blockLength=blockLength,
-            time=1000,
-            numberClusters=4,
-            firmsPerCluster=5,
-            numberTrue=2,
-            strength=0.4,
+            time=time,
+            numberClusters=numberClusters,
+            firmsPerCluster=firmsPerCluster,
+            numberTrue=numberTrue,
+            strength=strength,
             phi=basePhi,
             rho=rho
         )
@@ -300,10 +308,13 @@ def createSummaryTableWithBootstrap(allResults, alpha):
 
             if method == 'Bootstrap-Single':
                 row['Avg_tStar'] = f"{stats['tStar_mean']:.2f}"
+                row['Threshold'] = f"{stats['tStar_mean']:.2f}"
             elif method == 'Bootstrap-RomanoWolf':
+                row['Avg_tStar'] = '-'
                 row['Threshold'] = 'Adaptive'
             else:
                 row['Avg_tStar'] = '-'
+                row['Threshold'] = '-'
 
             rows.append(row)
 

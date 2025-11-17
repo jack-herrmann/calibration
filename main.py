@@ -24,6 +24,10 @@ NUMBERTRUE = 1
 NUMBERCLUSTERS = 2
 FIRMSPERCLUSTER = 3
 
+
+def printUsage():
+    print("Usage: python main.py [data|baseline|bootstrap]")
+
 def runGenerateData():
     clusteredDatasets = generateClusteredDatasets(
         TIME,
@@ -72,7 +76,7 @@ def runBootstrap():
         BASERHO
     )
 
-    table = createSummaryTableWithBootstrap(allResultsBootstrap)
+    table = createSummaryTableWithBootstrap(allResultsBootstrap, ALPHA)
     print(table.to_string(index=False))
 
     plotFWERvsDependenceWithBootstrap(allResultsBootstrap)
