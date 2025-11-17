@@ -75,7 +75,9 @@ def movingBlockClusterBootstrap(data, clusterLabels, blockLength, numberBootstra
     return bootstrapSamples
 
 def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
-    bootstrapSamples = movingBlockClusterBootstrap(data, clusterLabels, blockLength, numberBootstrap)
+    centeredData = data - np.mean(data, axis=0, keepdims=True)
+
+    bootstrapSamples = movingBlockClusterBootstrap(centeredData, clusterLabels, blockLength, numberBootstrap)
     maxStats = []
 
     for bootstrapData in bootstrapSamples:
@@ -124,7 +126,9 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     rejected = np.zeros(K, dtype=bool)
     adjustedPvals = np.ones(K)
 
-    bootstrapSamples = movingBlockClusterBootstrap(data, clusterLabels, blockLength, numberBootstrap)
+    centeredData = data - np.mean(data, axis=0, keepdims=True)
+
+    bootstrapSamples = movingBlockClusterBootstrap(centeredData, clusterLabels, blockLength, numberBootstrap)
 
     bootstrapTStats = []
     for bootData in bootstrapSamples:
