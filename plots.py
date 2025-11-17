@@ -407,3 +407,70 @@ def plotFWERvsPowerWithBootstrap(allResults):
 
     plt.tight_layout()
     plt.show()
+
+# Plot functions from bootstrap.py
+def plotCalibrationCurves(calibrationResults, savePath=None):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+    alphaLevels = sorted(calibrationResults.keys())
+
+    methods = ['Bonferroni', 'Holm', 'BH', 'Bootstrap-Single', 'Bootstrap-RomanoWolf']
+    colors = {
+        'Bonferroni': 'blue',
+        'Holm': 'green',
+        'BH': 'orange',
+        'Bootstrap-Single': 'purple',
+        'Bootstrap-RomanoWolf': 'red'
+    }
+
+    # fwer calibration
+    for method in methods:
+        fwers = [calibrationResults[alpha][method]['fwer_mean'] for alpha in alphaLevels]
+        fwer_ses = [calibrationResults[alpha][method]['fwer_se'] for alpha in alphaLevels]
+
+        ax1.plot(alphaLevels, fwers, marker='o', label=method,
+                color=colors[method], linewidth=2, markersize=8)
+        ax1.errorbar(alphaLevels, fwers, yerr=fwer_ses, fmt='none',
+                    color=colors[method], alpha=0.3, capsize=4)
+
+    # perfect calibration line
+    ax1.plot([0, max(alphaLevels)], [0, max(alphaLevels)],
+            'k--', linewidth=2, label='Perfect Calibration', alpha=0.5)
+
+    ax1.set_xlabel('Nominal FWER (α)', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Realized FWER', fontsize=12, fontweight='bold')
+    ax1.set_title('FWER Calibration Curve', fontsize=14, fontweight='bold')
+    ax1.legend(loc='best', fontsize=9)
+    ax1.grid(alpha=0.3)
+    ax1.set_xlim([0, max(alphaLevels) * 1.1])
+    ax1.set_ylim([0, 1.05])
+
+    # fdr calibration
+    for method in methods:
+        fdrs = [calibrationResults[alpha][method]['fdr_mean'] for alpha in alphaLevels]
+        fdr_ses = [calibrationResults[alpha][method]['fdr_se'] for alpha in alphaLevels]
+
+        ax2.plot(alphaLevels, fdrs, marker='o', label=method,
+                color=colors[method], linewidth=2, markersize=8)
+        ax2.errorbar(alphaLevels, fdrs, yerr=fdr_ses, fmt='none',
+                    color=colors[method], alpha=0.3, capsize=4)
+
+    # perfect calibration line
+    ax2.plot([0, max(alphaLevels)], [0, max(alphaLevels)],
+            'k--', linewidth=2, label='Perfect Calibration', alpha=0.5)
+
+    ax2.set_xlabel('Nominal FDR (α)', fontsize=12, fontweight='bold')
+    ax2.set_ylabel('Realized FDR', fontsize=12, fontweight='bold')
+    ax2.set_title('FDR Calibration Curve', fontsize=14, fontweight='bold')
+    ax2.legend(loc='best', fontsize=9)
+    ax2.grid(alpha=0.3)
+    ax2.set_xlim([0, max(alphaLevels) * 1.1])
+    ax2.set_ylim([0, 1.05])
+
+    plt.tight_layout()
+
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"Figure saved to {savePath}")
+
+    plt.show()

@@ -87,25 +87,16 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
+# compute the effective number of independent tests
 def effectiveNumberTests(maxStats, alpha, K, df):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    pSingleTail = 1 - stats.t.cdf(tStar, df=df)
-
-    if pSingleTail > 0 and pSingleTail < 0.5:
-        denominator = np.log1p(-2 * pSingleTail)
-
-        if abs(denominator) < 1e-10:
-            kEff = -np.log(1 - alpha) / (2 * pSingleTail) if pSingleTail > 0 else K
-        else:
-            kEff = np.log(1 - alpha) / denominator
-
-        kEff = min(kEff, K * 1000)
-    else:
-        kEff = K
+    pTwoTail = 2 * (1 - stats.t.cdf(tStar, df=df))
+    p_clipped = np.clip(pTwoTail, 1e-12, 1 - 1e-12)
+    kEff = np.log1p(-alpha) / np.log1p(-p_clipped)
+    kEff = np.clip(kEff, 1.0, float(K))
 
     return kEff
-
 
 def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap):
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
@@ -113,9 +104,9 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
 
     tStats, pVals = computeTestStatistics(data) #  test statistics on original data
     K = len(tStats)
-    df = data.shape[0] - 1  # degrees of freedom for t-test
+    degreesFreedom = data.shape[0] - 1
 
-    kEff = effectiveNumberTests(maxStats, alpha, K, df)
+    kEff = effectiveNumberTests(maxStats, alpha, K, degreesFreedom)
 
     rejected = np.abs(tStats) > tStar
     performance = measurePerformance(rejected, isTrue)
@@ -145,8 +136,8 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     bootstrapTStats = np.array(bootstrapTStats)
 
     maxStats = np.max(bootstrapTStats, axis=1)
-    df = data.shape[0] - 1  # degrees of freedom for t-test
-    kEff = effectiveNumberTests(maxStats, alpha, K, df)
+    degreesFreedom = data.shape[0] - 1
+    kEff = effectiveNumberTests(maxStats, alpha, K, degreesFreedom)
 
     for k in range(K):
         remainingIndices = sortedIndices[k:]
