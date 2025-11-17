@@ -1,16 +1,8 @@
 import sys
-from V2baseline import *
-from V2bootstrap import *
-from V2generateSyntheticData import *
-from V2plots import (
-    plotFWERvsDependence,
-    plotPowerVsDependence,
-    plotFWERvsPowerDetailed,
-    plotFWERvsDependenceWithBootstrap,
-    plotPowerVsDependenceWithBootstrap,
-    plotFWERvsPowerWithBootstrap,
-    plotDatasets
-)
+from baseline import *
+from bootstrap import *
+from generateSyntheticData import *
+from plots import *
 
 np.random.seed(73)
 

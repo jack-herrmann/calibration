@@ -1,5 +1,5 @@
 import numpy as np
-from V2baseline import *
+from baseline import *
 
 def movingBlockBootstrap(data, blockLength, numberBootstrap):
     time, _ = data.shape
@@ -85,7 +85,6 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
-# new function (Moritz)
 def effectiveNumberTests(maxStats, alpha, K):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
     
@@ -103,7 +102,6 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    # new change (Moritz)
     kEff = effectiveNumberTests(maxStats, alpha, K)
 
     tStats, pVals = computeTestStatistics(data) #  test statistics on original data
@@ -111,7 +109,7 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     rejected = np.abs(tStats) > tStar
     performance = measurePerformance(rejected, isTrue)
     performance['tStar'] = tStar
-    performance['kEff'] = kEff # new change (Moritz)
+    performance['kEff'] = kEff
 
     return performance, tStar, rejected
 
@@ -133,7 +131,6 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
         bootstrapTStats.append(np.abs(bootT))
     bootstrapTStats = np.array(bootstrapTStats)
 
-    # new change (Moritz)
     maxStats = np.max(bootstrapTStats, axis=1)
     kEff = effectiveNumberTests(maxStats, alpha, K)
 
@@ -150,7 +147,7 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
             break
 
     performance = measurePerformance(rejected, isTrue)
-    performance['kEff'] = kEff # new change (Moritz)
+    performance['kEff'] = kEff
 
     return performance, rejected, adjustedPvals
 
@@ -163,7 +160,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
         'Bootstrap-RomanoWolf': None
     }
 
-    results = {method: {'fwer': [], 'fdr': [], 'power': [], 'kEff': []} for method in methods} # new change (Moritz)
+    results = {method: {'fwer': [], 'fdr': [], 'power': [], 'kEff': []} for method in methods}
     results['Bootstrap-Single']['tStars'] = []
 
     for rep in range(numReps):

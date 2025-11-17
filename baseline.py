@@ -1,6 +1,6 @@
 from scipy import stats
 import pandas as pd
-from V2generateSyntheticData import *
+from generateSyntheticData import *
 
 def computeTestStatistics(data):
     _, signals = data.shape
