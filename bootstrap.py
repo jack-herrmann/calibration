@@ -204,15 +204,21 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
 
     summary = {}
     for methodName in methods:
+        kEffValues = np.array(results[methodName]['kEff'])
+        hasKeff = 'Bootstrap' in methodName and kEffValues.size > 0 and np.any(~np.isnan(kEffValues))
+
+        kEffMean = np.nanmean(kEffValues) if hasKeff else np.nan
+        kEffCI = np.nanpercentile(kEffValues, [2.5, 97.5]) if hasKeff else np.array([np.nan, np.nan])
+
         summary[methodName] = {
             'fwer_mean': np.mean(results[methodName]['fwer']),
             'fdr_mean': np.mean(results[methodName]['fdr']),
             'power_mean': np.nanmean(results[methodName]['power']),
-            'kEff_mean': np.nanmean(results[methodName]['kEff']),
+            'kEff_mean': kEffMean,
             'fwer_ci': np.percentile(results[methodName]['fwer'], [2.5, 97.5]),
             'fdr_ci': np.percentile(results[methodName]['fdr'], [2.5, 97.5]),
             'power_ci': np.nanpercentile(results[methodName]['power'], [2.5, 97.5]),
-            'kEff_ci': np.nanpercentile(results[methodName]['kEff'], [2.5, 97.5])
+            'kEff_ci': kEffCI
         }
 
         if methodName == 'Bootstrap-Single':
