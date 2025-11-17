@@ -8,21 +8,21 @@ np.random.seed(73)
 
 # Experiment parameters
 ALPHA = 0.05
-NUMBERREPS = 100
+NUMBERREPS = 20
 
 # Bootstrap parameters
-NUMBERBOOTSTRAP = 1000
+NUMBERBOOTSTRAP = 100
 BLOCKLENGTH = 12 # rule of thumb: 1/(1 - phi)
 
 # Data generation parameters
-TIME = 1000
+TIME = 200
 PERIOD = 50
 BASEPHI = 0.5
 BASERHO = 0.5
 STRENGTH = 0.05
-NUMBERTRUE = 2
+NUMBERTRUE = 1
 NUMBERCLUSTERS = 2
-FIRMSPERCLUSTER = 5
+FIRMSPERCLUSTER = 3
 
 def runGenerateData():
     clusteredDatasets = generateClusteredDatasets(
@@ -86,12 +86,12 @@ if __name__ == "__main__":
     
     command = sys.argv[1].lower()
     
-    if command == "baseline":
+    if command == "data":
+        runGenerateData()
+    elif command == "baseline":
         runBaseline()
     elif command == "bootstrap":
         runBootstrap()
-    elif command == "data":
-        runGenerateData()
     else:
         print(f"\nError: Unknown command '{command}'")
         printUsage()
