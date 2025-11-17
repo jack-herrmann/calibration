@@ -233,6 +233,8 @@ def plotFWERvsPowerDetailed(allResults):
     plt.tight_layout()
     plt.show()
 
+
+
 # Plot functions from bootstrap.py
 def plotFWERvsDependenceWithBootstrap(allResults):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
