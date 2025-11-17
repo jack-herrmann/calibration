@@ -87,16 +87,23 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
-def effectiveNumberTests(maxStats, alpha, K):
+def effectiveNumberTests(maxStats, alpha, K, df):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
-    
-    pSingleTail = 1 - stats.t.cdf(tStar, df=999)
-    
+
+    pSingleTail = 1 - stats.t.cdf(tStar, df=df)
+
     if pSingleTail > 0 and pSingleTail < 0.5:
-        kEff = np.log(1 - alpha) / np.log(1 - 2 * pSingleTail)
+        denominator = np.log1p(-2 * pSingleTail)
+
+        if abs(denominator) < 1e-10:
+            kEff = -np.log(1 - alpha) / (2 * pSingleTail) if pSingleTail > 0 else K
+        else:
+            kEff = np.log(1 - alpha) / denominator
+
+        kEff = min(kEff, K * 1000)
     else:
         kEff = K
-    
+
     return kEff
 
 
@@ -106,8 +113,9 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
 
     tStats, pVals = computeTestStatistics(data) #  test statistics on original data
     K = len(tStats)
+    df = data.shape[0] - 1  # degrees of freedom for t-test
 
-    kEff = effectiveNumberTests(maxStats, alpha, K)
+    kEff = effectiveNumberTests(maxStats, alpha, K, df)
 
     rejected = np.abs(tStats) > tStar
     performance = measurePerformance(rejected, isTrue)
@@ -137,7 +145,8 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     bootstrapTStats = np.array(bootstrapTStats)
 
     maxStats = np.max(bootstrapTStats, axis=1)
-    kEff = effectiveNumberTests(maxStats, alpha, K)
+    df = data.shape[0] - 1  # degrees of freedom for t-test
+    kEff = effectiveNumberTests(maxStats, alpha, K, df)
 
     for k in range(K):
         remainingIndices = sortedIndices[k:]
