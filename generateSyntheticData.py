@@ -1,5 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from constants import (
+    TIME, PERIOD, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
+    BASEPHI, BASERHO
+)
 
 np.random.seed(73)
 
@@ -56,7 +60,7 @@ def generateClusteredPanelWithPlantedSignals(time, numberClusters, firmsPerClust
 
     return data, clusterLabels, isTrue
 
-def generateClusteredDatasets(time, numberClusters, firmsPerCluster, numberTrue, strength, basePhi, baseRho):
+def generateClusteredDatasets():
     phiLevels = [0.0, 0.3, 0.6, 0.9]
     rhoLevels = [0.0, 0.3, 0.6, 0.9]
 
@@ -65,7 +69,7 @@ def generateClusteredDatasets(time, numberClusters, firmsPerCluster, numberTrue,
     phiRow = []
     for phi in phiLevels:
         data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
-            time, numberClusters, firmsPerCluster, numberTrue, strength, phi, baseRho
+            TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, phi, BASERHO
         )
         phiRow.append((data, clusterLabels, isTrue))
     datasets.append(phiRow)
@@ -73,7 +77,7 @@ def generateClusteredDatasets(time, numberClusters, firmsPerCluster, numberTrue,
     rhoRow = []
     for rho in rhoLevels:
         data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
-            time, numberClusters, firmsPerCluster, numberTrue, strength, basePhi, rho
+            TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, BASEPHI, rho
         )
         rhoRow.append((data, clusterLabels, isTrue))
     datasets.append(rhoRow)

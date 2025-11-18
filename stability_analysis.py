@@ -3,8 +3,12 @@ import pandas as pd
 from baseline import *
 from bootstrap import *
 from generateSyntheticData import *
+from constants import (
+    TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
+    ALPHALEVELS, NUMBERREPS_STABILITY, NUMBERBOOTSTRAP, BLOCKLENGTH
+)
 
-def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap, method='Bootstrap-RomanoWolf'):
+def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength=BLOCKLENGTH, numberBootstrap=NUMBERBOOTSTRAP, method='Bootstrap-RomanoWolf'):
     K = data.shape[1]
 
     # original data rejections
@@ -106,7 +110,7 @@ def createStabilityTable(stabilityResults):
 
     return df
 
-def runStabilityExperiment(alphaLevels, numReps, numberBootstrap, blockLength, **dgpParams):
+def runStabilityExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS_STABILITY, numberBootstrap=NUMBERBOOTSTRAP, blockLength=BLOCKLENGTH):
     methods = ['Bonferroni', 'Holm', 'BH', 'Bootstrap-Single', 'Bootstrap-RomanoWolf']
 
     allResults = {}
@@ -125,7 +129,9 @@ def runStabilityExperiment(alphaLevels, numReps, numberBootstrap, blockLength, *
             }
 
             for rep in range(numReps):
-                data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(**dgpParams)
+                data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
+                    TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, phi, rho
+                )
 
                 stability = analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap, method)
 

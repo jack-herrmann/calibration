@@ -1,6 +1,10 @@
 from scipy import stats
 import pandas as pd
 from generateSyntheticData import *
+from constants import (
+    TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
+    BASEPHI, BASERHO, ALPHA, NUMBERREPS
+)
 
 def computeTestStatistics(data):
     _, signals = data.shape
@@ -89,7 +93,7 @@ def measurePerformance(rejected, isTrue):
         'totalDiscoveries': totalDiscoveries
     }
 
-def monteCarloMultipleMethods(numReps, alpha, **dgpParams):
+def monteCarloMultipleMethods(phi, rho, alpha=ALPHA, numReps=NUMBERREPS):
     methods = {
         'Bonferroni': bonferroni,
         'Holm': holm,
@@ -99,7 +103,9 @@ def monteCarloMultipleMethods(numReps, alpha, **dgpParams):
     results = {method: {'fwer': [], 'fdr': [], 'power': []} for method in methods}
 
     for rep in range(numReps):
-        data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(**dgpParams)
+        data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
+            TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, phi, rho
+        )
 
         _, pVals = computeTestStatistics(data)
 
@@ -124,7 +130,7 @@ def monteCarloMultipleMethods(numReps, alpha, **dgpParams):
 
     return summary
 
-def runFullGrid(numReps, alpha, time, numberClusters, firmsPerCluster, numberTrue, strength, basePhi, baseRho):
+def runFullGrid():
     phiLevels = [0.0, 0.3, 0.6, 0.9]
     rhoLevels = [0.0, 0.3, 0.6, 0.9]
 
@@ -132,53 +138,31 @@ def runFullGrid(numReps, alpha, time, numberClusters, firmsPerCluster, numberTru
 
     # row 0: varying phi
     for phi in phiLevels:
-
-        summary = monteCarloMultipleMethods(
-            numReps=numReps,
-            alpha=alpha,
-            time=time,
-            numberClusters=numberClusters,
-            firmsPerCluster=firmsPerCluster,
-            numberTrue=numberTrue,
-            strength=strength,
-            phi=phi,
-            rho=baseRho
-        )
+        summary = monteCarloMultipleMethods(phi=phi, rho=BASERHO)
 
         for method in summary:
             summary[method]['scenario'] = f'phi={phi}'
             summary[method]['varied_param'] = 'phi'
             summary[method]['phi'] = phi
-            summary[method]['rho'] = baseRho
+            summary[method]['rho'] = BASERHO
 
         allResults.append(summary)
 
     # row 1: varying rho
     for rho in rhoLevels:
-
-        summary = monteCarloMultipleMethods(
-            numReps=numReps,
-            alpha=alpha,
-            time=time,
-            numberClusters=numberClusters,
-            firmsPerCluster=firmsPerCluster,
-            numberTrue=numberTrue,
-            strength=strength,
-            phi=basePhi,
-            rho=rho
-        )
+        summary = monteCarloMultipleMethods(phi=BASEPHI, rho=rho)
 
         for method in summary:
             summary[method]['scenario'] = f'rho={rho}'
             summary[method]['varied_param'] = 'rho'
-            summary[method]['phi'] = basePhi
+            summary[method]['phi'] = BASEPHI
             summary[method]['rho'] = rho
 
         allResults.append(summary)
 
     return allResults
 
-def createSummaryTable(allResults, alpha):
+def createSummaryTable(allResults):
     rows = []
 
     for scenarioResults in allResults:
@@ -189,7 +173,7 @@ def createSummaryTable(allResults, alpha):
                 'Scenario': stats['scenario'],
                 'phi': stats['phi'],
                 'rho': stats['rho'],
-                'alpha': alpha,
+                'alpha': ALPHA,
                 'FWER': f"{stats['fwer_mean']:.1%}",
                 'FWER_CI': f"[{stats['fwer_ci'][0]:.1%}, {stats['fwer_ci'][1]:.1%}]",
                 'FDR': f"{stats['fdr_mean']:.1%}",

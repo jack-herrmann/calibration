@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from constants import PERIOD
 
 # Plot function from generateSyntheticData.py
-def plotDatasets(datasets, periods):
+def plotDatasets(datasets, periods=PERIOD):
     fig, axes = plt.subplots(2, 4, figsize=(16, 6))
     phiLevels = [0.0, 0.3, 0.6, 0.9]
     rhoLevels = [0.0, 0.3, 0.6, 0.9]
