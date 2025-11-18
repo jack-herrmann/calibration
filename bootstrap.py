@@ -22,7 +22,6 @@ def movingBlockBootstrap(data, blockLength, numberBootstrap):
     return bootstrapSamples
 
 def clusterBootstrap(data, clusterLabels, numberBootstrap):
-    time, _ = data.shape
     uniqueClusters = np.unique(clusterLabels)
     numberClusters = len(uniqueClusters)
 
@@ -102,7 +101,7 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    tStats, pVals = computeTestStatistics(data) #  test statistics on original data
+    tStats, _ = computeTestStatistics(data) #  test statistics on original data
     K = len(tStats)
     degreesFreedom = data.shape[0] - 1
 
@@ -113,7 +112,7 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     performance['tStar'] = tStar
     performance['kEff'] = kEff
 
-    return performance, tStar, rejected
+    return performance, tStar
 
 def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap):
     tStats, _ = computeTestStatistics(data)
@@ -123,10 +122,8 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     sortedStats = np.abs(tStats)[sortedIndices]
 
     rejected = np.zeros(K, dtype=bool)
-    adjustedPvals = np.ones(K)
 
     centeredData = data - np.mean(data, axis=0, keepdims=True)
-
     bootstrapSamples = movingBlockClusterBootstrap(centeredData, clusterLabels, blockLength, numberBootstrap)
 
     bootstrapTStats = []
@@ -144,7 +141,6 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
 
         maxStatsRemaining = np.max(bootstrapTStats[:, remainingIndices], axis=1)
         pAdj = np.mean(maxStatsRemaining >= sortedStats[k])
-        adjustedPvals[sortedIndices[k]] = pAdj
 
         if pAdj < alpha:
             rejected[sortedIndices[k]] = True
@@ -154,7 +150,7 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     performance = measurePerformance(rejected, isTrue)
     performance['kEff'] = kEff
 
-    return performance, rejected, adjustedPvals
+    return performance
 
 def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpParams):
     methods = {
@@ -184,7 +180,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
             results[methodName]['power'].append(performance['power'])
             results[methodName]['kEff'].append(np.nan)
 
-        performanceBoot, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+        performanceBoot, tStar = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
         results['Bootstrap-Single']['fwer'].append(performanceBoot['fwer'])
         results['Bootstrap-Single']['fdr'].append(performanceBoot['fdr'])
         results['Bootstrap-Single']['power'].append(performanceBoot['power'])
@@ -192,7 +188,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
         results['Bootstrap-Single']['kEff'].append(performanceBoot['kEff'])
 
 
-        performanceRW, _, _ = applyRomanoWolfBootstrapCalibration(
+        performanceRW = applyRomanoWolfBootstrapCalibration(
             data,
             clusterLabels,
             isTrue,
@@ -238,7 +234,7 @@ def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time,
     allResults = []
 
     # row 0: varying phi
-    for col, phi in enumerate(phiLevels):
+    for phi in phiLevels:
 
         summary = monteCarloWithBootstrap(
             numReps=numReps,
@@ -263,7 +259,7 @@ def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time,
         allResults.append(summary)
 
     # row 1: varying rho
-    for col, rho in enumerate(rhoLevels):
+    for rho in rhoLevels:
 
         summary = monteCarloWithBootstrap(
             numReps=numReps,

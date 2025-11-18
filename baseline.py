@@ -101,7 +101,7 @@ def monteCarloMultipleMethods(numReps, alpha, **dgpParams):
     for rep in range(numReps):
         data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(**dgpParams)
 
-        tStats, pVals = computeTestStatistics(data)
+        _, pVals = computeTestStatistics(data)
 
         for methodName, methodFunc in methods.items():
             rejected = methodFunc(pVals, alpha)
@@ -131,7 +131,7 @@ def runFullGrid(numReps, alpha, time, numberClusters, firmsPerCluster, numberTru
     allResults = []
 
     # row 0: varying phi
-    for col, phi in enumerate(phiLevels):
+    for phi in phiLevels:
 
         summary = monteCarloMultipleMethods(
             numReps=numReps,
@@ -154,7 +154,7 @@ def runFullGrid(numReps, alpha, time, numberClusters, firmsPerCluster, numberTru
         allResults.append(summary)
 
     # row 1: varying rho
-    for col, rho in enumerate(rhoLevels):
+    for rho in rhoLevels:
 
         summary = monteCarloMultipleMethods(
             numReps=numReps,
