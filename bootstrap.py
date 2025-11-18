@@ -1,5 +1,9 @@
 import numpy as np
 from baseline import *
+from constants import (
+    TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
+    BASEPHI, BASERHO, ALPHA, NUMBERREPS, NUMBERBOOTSTRAP, BLOCKLENGTH
+)
 
 def movingBlockBootstrap(data, blockLength, numberBootstrap):
     time, _ = data.shape
@@ -97,7 +101,7 @@ def effectiveNumberTests(maxStats, alpha, K, df):
 
     return kEff
 
-def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap):
+def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=BLOCKLENGTH, numberBootstrap=NUMBERBOOTSTRAP):
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
@@ -112,9 +116,9 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, n
     performance['tStar'] = tStar
     performance['kEff'] = kEff
 
-    return performance, tStar
+    return performance, tStar, rejected
 
-def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap):
+def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=BLOCKLENGTH, numberBootstrap=NUMBERBOOTSTRAP):
     tStats, _ = computeTestStatistics(data)
     K = len(tStats)
 
@@ -150,9 +154,9 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha, bloc
     performance = measurePerformance(rejected, isTrue)
     performance['kEff'] = kEff
 
-    return performance
+    return performance, rejected, kEff
 
-def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpParams):
+def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=BLOCKLENGTH):
     methods = {
         'Bonferroni': bonferroni,
         'Holm': holm,
@@ -165,7 +169,9 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
     results['Bootstrap-Single']['tStars'] = []
 
     for rep in range(numReps):
-        data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(**dgpParams)
+        data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
+            TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, phi, rho
+        )
         tStats, pVals = computeTestStatistics(data)
 
         for methodName, methodFunc in methods.items():
@@ -180,7 +186,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
             results[methodName]['power'].append(performance['power'])
             results[methodName]['kEff'].append(np.nan)
 
-        performanceBoot, tStar = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+        performanceBoot, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
         results['Bootstrap-Single']['fwer'].append(performanceBoot['fwer'])
         results['Bootstrap-Single']['fdr'].append(performanceBoot['fdr'])
         results['Bootstrap-Single']['power'].append(performanceBoot['power'])
@@ -188,7 +194,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
         results['Bootstrap-Single']['kEff'].append(performanceBoot['kEff'])
 
 
-        performanceRW = applyRomanoWolfBootstrapCalibration(
+        performanceRW, _, _ = applyRomanoWolfBootstrapCalibration(
             data,
             clusterLabels,
             isTrue,
@@ -227,7 +233,7 @@ def monteCarloWithBootstrap(numReps, alpha, numberBootstrap, blockLength, **dgpP
 
     return summary
 
-def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time, numberClusters, firmsPerCluster, numberTrue, strength, basePhi, baseRho):
+def runFullGridWithBootstrap():
     phiLevels = [0.0, 0.3, 0.6, 0.9]
     rhoLevels = [0.0, 0.3, 0.6, 0.9]
 
@@ -235,57 +241,31 @@ def runFullGridWithBootstrap(numReps, alpha, numberBootstrap, blockLength, time,
 
     # row 0: varying phi
     for phi in phiLevels:
-
-        summary = monteCarloWithBootstrap(
-            numReps=numReps,
-            alpha=alpha,
-            numberBootstrap=numberBootstrap,
-            blockLength=blockLength,
-            time=time,
-            numberClusters=numberClusters,
-            firmsPerCluster=firmsPerCluster,
-            numberTrue=numberTrue,
-            strength=strength,
-            phi=phi,
-            rho=baseRho
-        )
+        summary = monteCarloWithBootstrap(phi=phi, rho=BASERHO)
 
         for method in summary:
             summary[method]['scenario'] = f'phi={phi}'
             summary[method]['varied_param'] = 'phi'
             summary[method]['phi'] = phi
-            summary[method]['rho'] = baseRho
+            summary[method]['rho'] = BASERHO
 
         allResults.append(summary)
 
     # row 1: varying rho
     for rho in rhoLevels:
-
-        summary = monteCarloWithBootstrap(
-            numReps=numReps,
-            alpha=alpha,
-            numberBootstrap=numberBootstrap,
-            blockLength=blockLength,
-            time=time,
-            numberClusters=numberClusters,
-            firmsPerCluster=firmsPerCluster,
-            numberTrue=numberTrue,
-            strength=strength,
-            phi=basePhi,
-            rho=rho
-        )
+        summary = monteCarloWithBootstrap(phi=BASEPHI, rho=rho)
 
         for method in summary:
             summary[method]['scenario'] = f'rho={rho}'
             summary[method]['varied_param'] = 'rho'
-            summary[method]['phi'] = basePhi
+            summary[method]['phi'] = BASEPHI
             summary[method]['rho'] = rho
 
         allResults.append(summary)
 
     return allResults
 
-def createSummaryTableWithBootstrap(allResults, alpha):
+def createSummaryTableWithBootstrap(allResults):
 
     rows = []
     for scenarioResults in allResults:
@@ -296,7 +276,7 @@ def createSummaryTableWithBootstrap(allResults, alpha):
                 'Scenario': stats['scenario'],
                 'phi': stats['phi'],
                 'rho': stats['rho'],
-                'alpha': alpha,
+                'alpha': ALPHA,
                 'FWER': f"{stats['fwer_mean']:.1%}",
                 'FWER_CI': f"[{stats['fwer_ci'][0]:.1%}, {stats['fwer_ci'][1]:.1%}]",
                 'FDR': f"{stats['fdr_mean']:.1%}",

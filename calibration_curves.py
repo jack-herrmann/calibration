@@ -4,8 +4,12 @@ from baseline import *
 from bootstrap import *
 from generateSyntheticData import *
 from plots import plotCalibrationCurves
+from constants import (
+    TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
+    ALPHALEVELS, NUMBERREPS, NUMBERBOOTSTRAP, BLOCKLENGTH
+)
 
-def runCalibrationCurveExperiment(alphaLevels, numReps, numberBootstrap, blockLength, **dgpParams):
+def runCalibrationCurveExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=BLOCKLENGTH):
     methods = {
         'Bonferroni': bonferroni,
         'Holm': holm,
@@ -22,7 +26,9 @@ def runCalibrationCurveExperiment(alphaLevels, numReps, numberBootstrap, blockLe
         results = {method: {'fwer': [], 'fdr': [], 'power': []} for method in methods}
 
         for rep in range(numReps):
-            data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(**dgpParams)
+            data, clusterLabels, isTrue = generateClusteredPanelWithPlantedSignals(
+                TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH, phi, rho
+            )
             tStats, pVals = computeTestStatistics(data)
 
             # classical methods
