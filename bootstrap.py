@@ -90,6 +90,7 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
+# KEFF IS STILL A WORK IN PROGRESS
 # compute the effective number of independent tests
 def effectiveNumberTests(maxStats, alpha, K, df):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
