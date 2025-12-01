@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from constants import PERIOD
 
 # Plot function from generateSyntheticData.py
-def plotDatasets(datasets, periods=PERIOD):
+def plotDatasets(datasets, periods=PERIOD, savePath=None):
     fig, axes = plt.subplots(2, 4, figsize=(16, 6))
     phiLevels = [0.0, 0.3, 0.6, 0.9]
     rhoLevels = [0.0, 0.3, 0.6, 0.9]
@@ -86,10 +86,16 @@ def plotDatasets(datasets, periods=PERIOD):
         ax.set_xlabel('Time')
 
     plt.tight_layout()
-    plt.show()
+
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
 
 # Plot functions from baseline.py
-def plotFWERvsDependence(allResults):
+def plotFWERvsDependence(allResults, savePath=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     methods = ['Bonferroni', 'Holm', 'BH']
@@ -132,9 +138,15 @@ def plotFWERvsDependence(allResults):
     ax2.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
 
-def plotPowerVsDependence(allResults):
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
+
+def plotPowerVsDependence(allResults, savePath=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     methods = ['Bonferroni', 'Holm', 'BH']
@@ -177,9 +189,15 @@ def plotPowerVsDependence(allResults):
     ax2.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
 
-def plotFWERvsPowerDetailed(allResults):
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
+
+def plotFWERvsPowerDetailed(allResults, savePath=None):
     fig, ax = plt.subplots(figsize=(10, 8))
 
     methods = ['Bonferroni', 'Holm', 'BH']
@@ -232,12 +250,18 @@ def plotFWERvsPowerDetailed(allResults):
     ax.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
+
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
 
 
 
 # Plot functions from bootstrap.py
-def plotFWERvsDependenceWithBootstrap(allResults):
+def plotFWERvsDependenceWithBootstrap(allResults, savePath=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     methods = ['Bonferroni', 'Holm', 'BH', 'Bootstrap-Single', 'Bootstrap-RomanoWolf']
@@ -298,9 +322,15 @@ def plotFWERvsDependenceWithBootstrap(allResults):
     ax2.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
 
-def plotPowerVsDependenceWithBootstrap(allResults):
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
+
+def plotPowerVsDependenceWithBootstrap(allResults, savePath=None):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
     methods = ['Bonferroni', 'Holm', 'BH', 'Bootstrap-Single', 'Bootstrap-RomanoWolf']
@@ -347,9 +377,15 @@ def plotPowerVsDependenceWithBootstrap(allResults):
     ax2.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
 
-def plotFWERvsPowerWithBootstrap(allResults):
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
+
+def plotFWERvsPowerWithBootstrap(allResults, savePath=None):
     fig, ax = plt.subplots(figsize=(10, 8))
 
     methods = ['Bonferroni', 'Holm', 'BH', 'Bootstrap-Single', 'Bootstrap-RomanoWolf']
@@ -407,7 +443,13 @@ def plotFWERvsPowerWithBootstrap(allResults):
     ax.set_ylim([0, 1.05])
 
     plt.tight_layout()
-    plt.show()
+
+    if savePath:
+        plt.savefig(savePath, dpi=300, bbox_inches='tight')
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
 
 # Plot functions from bootstrap.py
 def plotCalibrationCurves(calibrationResults, savePath=None):
@@ -472,6 +514,7 @@ def plotCalibrationCurves(calibrationResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"Figure saved to {savePath}")
-
-    plt.show()
+        print(f"✓ Plot saved: {savePath}")
+        plt.close(fig)
+    else:
+        plt.show()
