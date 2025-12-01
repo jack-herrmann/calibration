@@ -6,10 +6,15 @@ from generateSyntheticData import *
 from plots import plotCalibrationCurves
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
-    ALPHALEVELS, NUMBERREPS, NUMBERBOOTSTRAP, BLOCKLENGTH
+    ALPHALEVELS, NUMBERREPS, NUMBERBOOTSTRAP, computeBlockLength
 )
 
-def runCalibrationCurveExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=BLOCKLENGTH):
+def runCalibrationCurveExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=None):
+    # Compute optimal block length based on phi if not provided
+    if blockLength is None:
+        blockLength = computeBlockLength(phi)
+        print(f"Using block length = {blockLength} (computed from phi={phi})")
+
     methods = {
         'Bonferroni': bonferroni,
         'Holm': holm,
