@@ -2,7 +2,7 @@ import numpy as np
 from baseline import *
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
-    BASEPHI, BASERHO, ALPHA, NUMBERREPS, NUMBERBOOTSTRAP, BLOCKLENGTH
+    BASEPHI, BASERHO, ALPHA, NUMBERREPS, NUMBERBOOTSTRAP, computeBlockLength
 )
 
 def movingBlockBootstrap(data, blockLength, numberBootstrap):
@@ -102,7 +102,10 @@ def effectiveNumberTests(maxStats, alpha, K, df):
 
     return kEff
 
-def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=BLOCKLENGTH, numberBootstrap=NUMBERBOOTSTRAP):
+def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=None, numberBootstrap=NUMBERBOOTSTRAP):
+    # blockLength should be passed explicitly by caller based on phi
+    if blockLength is None:
+        raise ValueError("blockLength must be provided (compute using computeBlockLength(phi))")
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
@@ -119,7 +122,10 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLen
 
     return performance, tStar, rejected
 
-def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=BLOCKLENGTH, numberBootstrap=NUMBERBOOTSTRAP):
+def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=None, numberBootstrap=NUMBERBOOTSTRAP):
+    # blockLength should be passed explicitly by caller based on phi
+    if blockLength is None:
+        raise ValueError("blockLength must be provided (compute using computeBlockLength(phi))")
     tStats, _ = computeTestStatistics(data)
     K = len(tStats)
 
@@ -157,7 +163,11 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA
 
     return performance, rejected, kEff
 
-def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=BLOCKLENGTH):
+def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=None):
+    # Compute optimal block length based on phi if not provided
+    if blockLength is None:
+        blockLength = computeBlockLength(phi)
+
     methods = {
         'Bonferroni': bonferroni,
         'Holm': holm,
