@@ -6,17 +6,6 @@ from calibration_curves import *
 from stability_analysis import *
 from plots import *
 
-np.random.seed(73)
-
-
-def printUsage():
-    print("Usage: python main.py [data|baseline|bootstrap|calibration|stability]")
-    print("  data        - Generate and visualize synthetic datasets")
-    print("  baseline    - Run baseline methods (Bonferroni, Holm, BH)")
-    print("  bootstrap   - Run bootstrap-based methods")
-    print("  calibration - Run calibration curve experiments across multiple alpha levels")
-    print("  stability   - Run discovery stability analysis across bootstrap resamples")
-
 def runGenerateData():
     clusteredDatasets = generateClusteredDatasets()
     plotDatasets(clusteredDatasets)
@@ -42,7 +31,7 @@ def runBootstrap():
     plotFWERvsPowerWithBootstrap(allResultsBootstrap)
 
 def runCalibrationCurves():
-    print("Scenario 1: High Time Dependence (φ=0.9, ρ=0.5)")
+    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
     results_highphi = runCalibrationCurveExperiment(phi=0.9, rho=0.5)
     table1 = createCalibrationTable(results_highphi)
     print("\n" + table1.to_string(index=False))
@@ -50,7 +39,7 @@ def runCalibrationCurves():
 
     print()
 
-    print("Scenario 2: High Cross-Sectional Correlation (φ=0.5, ρ=0.9)")
+    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
     results_highrho = runCalibrationCurveExperiment(phi=0.5, rho=0.9)
     table2 = createCalibrationTable(results_highrho)
     print("\n" + table2.to_string(index=False))
@@ -58,31 +47,33 @@ def runCalibrationCurves():
 
     print()
 
-    print("Scenario 3: Low Dependence (φ=0.0, ρ=0.0)")
+    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
     results_lowdep = runCalibrationCurveExperiment(phi=0.0, rho=0.0)
     table3 = createCalibrationTable(results_lowdep)
     print("\n" + table3.to_string(index=False))
     plotCalibrationCurves(results_lowdep)
 
 def runStabilityAnalysis():
-    print("Scenario 1: High Time Dependence (φ=0.9, ρ=0.5)")
+    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
     results_highphi = runStabilityExperiment(phi=0.9, rho=0.5)
     table1 = createStabilityTable(results_highphi)
     print("\n" + table1.to_string(index=False))
 
     print()
 
-    print("Scenario 2: High Cross-Sectional Correlation (φ=0.5, ρ=0.9)")
+    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
     results_highrho = runStabilityExperiment(phi=0.5, rho=0.9)
     table2 = createStabilityTable(results_highrho)
     print("\n" + table2.to_string(index=False))
 
     print()
 
-    print("Scenario 3: Low Dependence (φ=0.0, ρ=0.0)")
+    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
     results_lowdep = runStabilityExperiment(phi=0.0, rho=0.0)
     table3 = createStabilityTable(results_lowdep)
     print("\n" + table3.to_string(index=False))
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
