@@ -3,7 +3,7 @@ import pandas as pd
 from generateSyntheticData import *
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
-    BASEPHI, BASERHO, ALPHA, NUMBERREPS
+    BASEPHI, BASERHO, ALPHA, NUMBERREPS, PHI_LEVELS, RHO_LEVELS
 )
 
 def computeTestStatistics(data):
@@ -131,13 +131,10 @@ def monteCarloMultipleMethods(phi, rho, alpha=ALPHA, numReps=NUMBERREPS):
     return summary
 
 def runFullGrid():
-    phiLevels = [0.0, 0.3, 0.6, 0.9]
-    rhoLevels = [0.0, 0.3, 0.6, 0.9]
-
     allResults = []
 
     # row 0: varying phi
-    for phi in phiLevels:
+    for phi in PHI_LEVELS:
         summary = monteCarloMultipleMethods(phi=phi, rho=BASERHO)
 
         for method in summary:
@@ -149,7 +146,7 @@ def runFullGrid():
         allResults.append(summary)
 
     # row 1: varying rho
-    for rho in rhoLevels:
+    for rho in RHO_LEVELS:
         summary = monteCarloMultipleMethods(phi=BASEPHI, rho=rho)
 
         for method in summary:

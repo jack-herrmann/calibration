@@ -2,7 +2,8 @@ import numpy as np
 from baseline import *
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
-    BASEPHI, BASERHO, ALPHA, NUMBERREPS, NUMBERBOOTSTRAP, computeBlockLength
+    BASEPHI, BASERHO, ALPHA, NUMBERREPS, NUMBERBOOTSTRAP, computeBlockLength,
+    PHI_LEVELS, RHO_LEVELS
 )
 
 def movingBlockBootstrap(data, blockLength, numberBootstrap):
@@ -245,13 +246,10 @@ def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBoo
     return summary
 
 def runFullGridWithBootstrap():
-    phiLevels = [0.0, 0.3, 0.6, 0.9]
-    rhoLevels = [0.0, 0.3, 0.6, 0.9]
-
     allResults = []
 
     # row 0: varying phi
-    for phi in phiLevels:
+    for phi in PHI_LEVELS:
         summary = monteCarloWithBootstrap(phi=phi, rho=BASERHO)
 
         for method in summary:
@@ -263,7 +261,7 @@ def runFullGridWithBootstrap():
         allResults.append(summary)
 
     # row 1: varying rho
-    for rho in rhoLevels:
+    for rho in RHO_LEVELS:
         summary = monteCarloWithBootstrap(phi=BASEPHI, rho=rho)
 
         for method in summary:

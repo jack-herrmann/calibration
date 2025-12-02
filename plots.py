@@ -1,13 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from constants import PERIOD
+from constants import PERIOD, PHI_LEVELS, RHO_LEVELS
 
 # Plot function from generateSyntheticData.py
 def plotDatasets(datasets, periods=PERIOD, savePath=None):
     fig, axes = plt.subplots(2, 4, figsize=(16, 6))
-    phiLevels = [0.0, 0.3, 0.6, 0.9]
-    rhoLevels = [0.0, 0.3, 0.6, 0.9]
-
     colors = plt.cm.tab10(range(10))  # up to 10 different cluster colors
 
     # row 0: varying phi
@@ -40,7 +37,7 @@ def plotDatasets(datasets, periods=PERIOD, savePath=None):
                        alpha=0.6,
                        label=f'Cluster {clusterIdx} (null)' if col == 0 else '')
 
-        ax.set_title(f'φ={phiLevels[col]}', fontsize=11, fontweight='bold')
+        ax.set_title(f'φ={PHI_LEVELS[col]}', fontsize=11, fontweight='bold')
         ax.axhline(y=0, color='k', linestyle='--', alpha=0.3, linewidth=0.5)
         if col == 0:
             ax.set_ylabel('Vary Time Dep', fontweight='bold')
@@ -77,7 +74,7 @@ def plotDatasets(datasets, periods=PERIOD, savePath=None):
                        alpha=0.6,
                        label=f'Cluster {clusterIdx} (null)' if col == 0 else '')
 
-        ax.set_title(f'ρ={rhoLevels[col]}', fontsize=11, fontweight='bold')
+        ax.set_title(f'ρ={RHO_LEVELS[col]}', fontsize=11, fontweight='bold')
         ax.axhline(y=0, color='k', linestyle='--', alpha=0.3, linewidth=0.5)
         if col == 0:
             ax.set_ylabel('Vary Cluster Corr', fontweight='bold')
@@ -279,9 +276,6 @@ def plotFWERvsDependenceWithBootstrap(allResults, savePath=None):
         'Bootstrap-Single': 2,
         'Bootstrap-RomanoWolf': 2
     }
-
-    phiLevels = [0.0, 0.3, 0.6, 0.9]
-    rhoLevels = [0.0, 0.3, 0.6, 0.9]
 
     # plot 1: varying phi
     phiResults = [r for r in allResults if list(r.values())[0]['varied_param'] == 'phi']
