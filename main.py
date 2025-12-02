@@ -83,7 +83,7 @@ def printUsage():
     print("  bootstrap    - Run bootstrap analysis")
     print("  calibration  - Run calibration curve experiments")
     print("  stability    - Run stability analysis")
-    print("  all          - Run complete pipeline (data, calibration, stability) and save plots")
+    print("  all          - Run complete pipeline (data, bootstrap, calibration, stability) and save all plots")
     print()
 
 def runAll():
@@ -93,7 +93,22 @@ def runAll():
     plotDatasets(clusteredDatasets, savePath="plots/synthetic_datasets.png")
     print()
 
-    print("Step 2: Running calibration curve experiments...")
+    # 2. Run bootstrap grid analysis
+    print("Step 2: Running bootstrap grid analysis...")
+    print("(Testing all methods across parameter space)")
+    allResultsBootstrap = runFullGridWithBootstrap()
+    table = createSummaryTableWithBootstrap(allResultsBootstrap)
+    print("\n" + table.to_string(index=False))
+    print()
+
+    plotFWERvsDependenceWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_dependence.png")
+    plotPowerVsDependenceWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_power_vs_dependence.png")
+    plotFWERvsPowerWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_power.png")
+    print()
+
+    # 3. Run calibration curves for three scenarios
+    print("Step 3: Running calibration curve experiments...")
+    print("(Testing calibration at key scenarios)")
     print()
 
     print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
@@ -117,7 +132,9 @@ def runAll():
     plotCalibrationCurves(results_lowdep_cal, savePath="plots/calibration_lowdep.png")
     print()
 
-    print("Step 3: Running stability analysis...")
+    # 4. Run stability analysis for three scenarios
+    print("Step 4: Running stability analysis...")
+    print("(Testing discovery stability at key scenarios)")
     print()
 
     print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
