@@ -13,7 +13,7 @@ NUMBERREPS = 100
 NUMBERREPS_STABILITY = 50  # fewer reps for stability (computationally expensive)
 
 # Bootstrap parameters
-NUMBERBOOTSTRAP = 100
+NUMBERBOOTSTRAP = 200
 MIN_BLOCKLENGTH = 2  # minimum block length to avoid degenerate cases
 MAX_BLOCKLENGTH = 50  # maximum to avoid extremely long blocks
 
