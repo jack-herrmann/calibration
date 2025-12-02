@@ -159,7 +159,7 @@ def runFullGrid():
 
     return allResults
 
-def createSummaryTable(allResults):
+def createSummaryTable(allResults, savePath=None):
     rows = []
 
     for scenarioResults in allResults:
@@ -181,4 +181,9 @@ def createSummaryTable(allResults):
             rows.append(row)
 
     dataframe = pd.DataFrame(rows)
+
+    if savePath:
+        dataframe.to_csv(savePath, index=False)
+        print(f"✓ Table saved: {savePath}")
+
     return dataframe

@@ -84,7 +84,7 @@ def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, n
         'nullSurvivorMedian': np.median(nullSurvivor) if len(nullSurvivor) > 0 else np.nan,
     }
 
-def createStabilityTable(stabilityResults):
+def createStabilityTable(stabilityResults, savePath=None):
     rows = []
 
     for (alpha, method), stats in stabilityResults.items():
@@ -107,6 +107,10 @@ def createStabilityTable(stabilityResults):
     method_order = {'Bonferroni': 0, 'Holm': 1, 'BH': 2, 'Bootstrap-Single': 3, 'Bootstrap-RomanoWolf': 4}
     df['Method_order'] = df['Method'].map(method_order)
     df = df.sort_values(['Alpha_num', 'Method_order']).drop(['Alpha_num', 'Method_order'], axis=1)
+
+    if savePath:
+        df.to_csv(savePath, index=False)
+        print(f"✓ Table saved: {savePath}")
 
     return df
 

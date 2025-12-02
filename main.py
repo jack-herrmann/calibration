@@ -13,61 +13,38 @@ def runGenerateData():
     plotDatasets(clusteredDatasets)
 
 def runBaseline():
-    os.makedirs("results", exist_ok=True)
-
     allResults = runFullGrid()
-
-    table = createSummaryTable(allResults)
-    table.to_csv("results/baseline_grid_summary.csv", index=False)
-    print("✓ Table saved: results/baseline_grid_summary.csv")
+    createSummaryTable(allResults, savePath="results/baseline_grid_summary.csv")
 
     plotFWERvsDependence(allResults)
     plotPowerVsDependence(allResults)
     plotFWERvsPowerDetailed(allResults)
 
 def runBootstrap():
-    os.makedirs("results", exist_ok=True)
-
     allResultsBootstrap = runFullGridWithBootstrap()
-
-    table = createSummaryTableWithBootstrap(allResultsBootstrap)
-    table.to_csv("results/bootstrap_grid_summary.csv", index=False)
-    print("✓ Table saved: results/bootstrap_grid_summary.csv")
+    createSummaryTableWithBootstrap(allResultsBootstrap, savePath="results/bootstrap_grid_summary.csv")
 
     plotFWERvsDependenceWithBootstrap(allResultsBootstrap)
     plotPowerVsDependenceWithBootstrap(allResultsBootstrap)
     plotFWERvsPowerWithBootstrap(allResultsBootstrap)
 
 def runCalibrationCurves():
-    os.makedirs("results", exist_ok=True)
     scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
 
     for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
         print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
         results = runCalibrationCurveExperiment(phi=phi, rho=rho)
-        table = createCalibrationTable(results)
-
-        # Save table
-        table_path = f"results/calibration_{scenario_names[idx-1]}.csv"
-        table.to_csv(table_path, index=False)
-        print(f"✓ Table saved: {table_path}")
-
+        createCalibrationTable(results, savePath=f"results/calibration_{scenario_names[idx-1]}.csv")
         plotCalibrationCurves(results)
         print()
 
 def runStabilityAnalysis():
-    os.makedirs("results", exist_ok=True)
     scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
 
     for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
         print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
         results = runStabilityExperiment(phi=phi, rho=rho)
-        table = createStabilityTable(results)
-
-        # Save table
-        table_path = f"results/stability_{scenario_names[idx-1]}.csv"
-        table.to_csv(table_path, index=False)
-        print(f"✓ Table saved: {table_path}")
+        createStabilityTable(results, savePath=f"results/stability_{scenario_names[idx-1]}.csv")
         print()
 
 def printUsage():
@@ -97,9 +74,7 @@ def runAll():
     print("Step 2: Running bootstrap grid analysis...")
     print("(Testing all methods across parameter space)")
     allResultsBootstrap = runFullGridWithBootstrap()
-    table = createSummaryTableWithBootstrap(allResultsBootstrap)
-    table.to_csv("results/bootstrap_grid_summary.csv", index=False)
-    print("✓ Table saved: results/bootstrap_grid_summary.csv")
+    createSummaryTableWithBootstrap(allResultsBootstrap, savePath="results/bootstrap_grid_summary.csv")
     print()
 
     plotFWERvsDependenceWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_dependence.png")
@@ -116,13 +91,7 @@ def runAll():
     for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
         print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
         results = runCalibrationCurveExperiment(phi=phi, rho=rho)
-        table = createCalibrationTable(results)
-
-        # Save table and plot
-        table_path = f"results/calibration_{scenario_names[idx-1]}.csv"
-        table.to_csv(table_path, index=False)
-        print(f"✓ Table saved: {table_path}")
-
+        createCalibrationTable(results, savePath=f"results/calibration_{scenario_names[idx-1]}.csv")
         plotCalibrationCurves(results, savePath=f"plots/calibration_{scenario_names[idx-1]}.png")
         print()
 
@@ -134,12 +103,7 @@ def runAll():
     for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
         print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
         results = runStabilityExperiment(phi=phi, rho=rho)
-        table = createStabilityTable(results)
-
-        # Save table
-        table_path = f"results/stability_{scenario_names[idx-1]}.csv"
-        table.to_csv(table_path, index=False)
-        print(f"✓ Table saved: {table_path}")
+        createStabilityTable(results, savePath=f"results/stability_{scenario_names[idx-1]}.csv")
         print()
 
     print("=" * 60)

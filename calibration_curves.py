@@ -79,7 +79,7 @@ def runCalibrationCurveExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUM
     return allResults
 
 
-def createCalibrationTable(calibrationResults):
+def createCalibrationTable(calibrationResults, savePath=None):
     rows = []
 
     for alpha in sorted(calibrationResults.keys()):
@@ -97,4 +97,9 @@ def createCalibrationTable(calibrationResults):
             rows.append(row)
 
     dataframe = pd.DataFrame(rows)
+
+    if savePath:
+        dataframe.to_csv(savePath, index=False)
+        print(f"✓ Table saved: {savePath}")
+
     return dataframe
