@@ -50,7 +50,7 @@ def runStabilityAnalysis():
         print()
 
 def printUsage():
-    """Print usage information for the main script."""
+    """Print usage information for the main script"""
     print("\nUsage: python main.py <command>")
     print("\nAvailable commands:")
     print("  data         - Generate and plot synthetic datasets")
@@ -62,19 +62,7 @@ def printUsage():
     print()
 
 def runAll():
-    """
-    Run the complete pipeline: generate data, run bootstrap grid analysis,
-    calibration curves, and stability analysis. Save all plots to the plots folder.
-    """
-    # Create plots directory if it doesn't exist
-    os.makedirs("plots", exist_ok=True)
-
-    print("=" * 60)
-    print("RUNNING COMPLETE ANALYSIS PIPELINE")
-    print("=" * 60)
-    print()
-
-    # 1. Generate and save synthetic data plots
+    """Run the complete pipeline and save all plots"""
     print("Step 1: Generating synthetic data...")
     clusteredDatasets = generateClusteredDatasets()
     plotDatasets(clusteredDatasets, savePath="plots/synthetic_datasets.png")
@@ -119,9 +107,7 @@ def runAll():
         print("\n" + table.to_string(index=False))
         print()
 
-    print("=" * 60)
-    print("PIPELINE COMPLETE - All plots saved to 'plots/' directory")
-    print("=" * 60)
+    print("PIPELINE COMPLETE (All plots saved)")
 
 
 

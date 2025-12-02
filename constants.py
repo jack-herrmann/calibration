@@ -8,12 +8,12 @@ import numpy as np
 
 # Experiment parameters
 ALPHA = 0.05
-ALPHALEVELS = [0.005, 0.01, 0.02, 0.05]  # For calibration curves and stability
-NUMBERREPS = 100
-NUMBERREPS_STABILITY = 50  # fewer reps for stability (computationally expensive)
+ALPHALEVELS = [0.01, 0.025, 0.05]  # For calibration curves and stability
+NUMBERREPS = 200
+NUMBERREPS_STABILITY = 100  # fewer reps for stability (computationally expensive)
 
 # Bootstrap parameters
-NUMBERBOOTSTRAP = 100
+NUMBERBOOTSTRAP = 200
 MIN_BLOCKLENGTH = 2  # minimum block length to avoid degenerate cases
 MAX_BLOCKLENGTH = 50  # maximum to avoid extremely long blocks
 
