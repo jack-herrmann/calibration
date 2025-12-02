@@ -8,9 +8,9 @@ import numpy as np
 
 # Experiment parameters
 ALPHA = 0.05
-ALPHALEVELS = [0.01, 0.025, 0.05]  # For calibration curves and stability
-NUMBERREPS = 200
-NUMBERREPS_STABILITY = 100  # fewer reps for stability (computationally expensive)
+ALPHALEVELS = [0.01, 0.05]  # For calibration curves and stability (reduced for efficiency)
+NUMBERREPS = 100
+NUMBERREPS_STABILITY = 50  # fewer reps for stability (computationally expensive)
 
 # Bootstrap parameters
 NUMBERBOOTSTRAP = 200
