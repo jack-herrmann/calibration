@@ -91,14 +91,30 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
-# KEFF IS STILL A WORK IN PROGRESS
 # compute the effective number of independent tests
 def effectiveNumberTests(maxStats, alpha, K, df):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    pTwoTail = 2 * (1 - stats.t.cdf(tStar, df=df))
-    p_clipped = np.clip(pTwoTail, 1e-12, 1 - 1e-12)
-    kEff = np.log1p(-alpha) / np.log1p(-p_clipped)
+    # we use logsf for better numerical stability
+    log_p_one_tail = stats.t.logsf(tStar, df=df)
+    log_p_two_tail = np.log(2) + log_p_one_tail
+
+    # if log_p < -10, we'll use the approximation
+    if log_p_two_tail < -10:
+        denom = -np.exp(log_p_two_tail)
+    else:
+        p = np.exp(log_p_two_tail)
+        # Clip p to avoid log(0) if p is exactly 1 (unlikely with tStar > 0)
+        p = np.clip(p, 0, 1 - 1e-16)
+        denom = np.log1p(-p)
+
+    numer = np.log1p(-alpha)
+
+    if denom == 0:
+        kEff = float(K)
+    else:
+        kEff = numer / denom
+
     kEff = np.clip(kEff, 1.0, float(K))
 
     return kEff
