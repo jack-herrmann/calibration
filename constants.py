@@ -34,9 +34,10 @@ RHO_LEVELS = [0.0, 0.3, 0.6, 0.9]
 # Key scenarios for focused analysis (calibration and stability)
 # Format: (phi, rho, description)
 SCENARIOS = [
-    (0.9, 0.5, "High Time Dependence"),
-    (0.5, 0.9, "High Cross-Sectional Correlation"),
-    (0.0, 0.0, "No Dependence")
+    (0.9, 0.9, "Joint Worst-Case"),
+    (0.9, 0.3, "High Time Dependence (Isolated)"),
+    (0.3, 0.9, "High Cross-Correlation (Isolated)"),
+    (0.0, 0.0, "No Dependence (Baseline)")
 ]
 
 def computeBlockLength(phi):

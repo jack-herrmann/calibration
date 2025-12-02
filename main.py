@@ -86,7 +86,7 @@ def runAll():
     print("(Testing calibration at key scenarios)")
     print()
 
-    scenario_names = ['highphi', 'highrho', 'lowdep']
+    scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
     for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
         print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
         results = runCalibrationCurveExperiment(phi=phi, rho=rho)
