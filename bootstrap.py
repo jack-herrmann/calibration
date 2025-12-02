@@ -274,7 +274,7 @@ def runFullGridWithBootstrap():
 
     return allResults
 
-def createSummaryTableWithBootstrap(allResults):
+def createSummaryTableWithBootstrap(allResults, savePath=None):
 
     rows = []
     for scenarioResults in allResults:
@@ -314,4 +314,9 @@ def createSummaryTableWithBootstrap(allResults):
             rows.append(row)
 
     dataframe = pd.DataFrame(rows)
+
+    if savePath:
+        dataframe.to_csv(savePath, index=False)
+        print(f"✓ Table saved: {savePath}")
+
     return dataframe
