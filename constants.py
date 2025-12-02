@@ -27,6 +27,18 @@ NUMBERTRUE = 1
 NUMBERCLUSTERS = 2
 FIRMSPERCLUSTER = 3
 
+# Grid sweep parameters (for baseline and bootstrap analyses)
+PHI_LEVELS = [0.0, 0.3, 0.6, 0.9]
+RHO_LEVELS = [0.0, 0.3, 0.6, 0.9]
+
+# Key scenarios for focused analysis (calibration and stability)
+# Format: (phi, rho, description)
+SCENARIOS = [
+    (0.9, 0.5, "High Time Dependence"),
+    (0.5, 0.9, "High Cross-Sectional Correlation"),
+    (0.0, 0.0, "No Dependence")
+]
+
 def computeBlockLength(phi):
     """
     Compute optimal block length for moving block bootstrap based on AR(1) coefficient.

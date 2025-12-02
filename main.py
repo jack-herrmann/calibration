@@ -6,6 +6,7 @@ from bootstrap import *
 from calibration_curves import *
 from stability_analysis import *
 from plots import *
+from constants import SCENARIOS
 
 def runGenerateData():
     clusteredDatasets = generateClusteredDatasets()
@@ -32,47 +33,21 @@ def runBootstrap():
     plotFWERvsPowerWithBootstrap(allResultsBootstrap)
 
 def runCalibrationCurves():
-    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
-    results_highphi = runCalibrationCurveExperiment(phi=0.9, rho=0.5)
-    table1 = createCalibrationTable(results_highphi)
-    print("\n" + table1.to_string(index=False))
-    plotCalibrationCurves(results_highphi)
-
-    print()
-
-    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
-    results_highrho = runCalibrationCurveExperiment(phi=0.5, rho=0.9)
-    table2 = createCalibrationTable(results_highrho)
-    print("\n" + table2.to_string(index=False))
-    plotCalibrationCurves(results_highrho)
-
-    print()
-
-    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
-    results_lowdep = runCalibrationCurveExperiment(phi=0.0, rho=0.0)
-    table3 = createCalibrationTable(results_lowdep)
-    print("\n" + table3.to_string(index=False))
-    plotCalibrationCurves(results_lowdep)
+    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
+        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
+        results = runCalibrationCurveExperiment(phi=phi, rho=rho)
+        table = createCalibrationTable(results)
+        print("\n" + table.to_string(index=False))
+        plotCalibrationCurves(results)
+        print()
 
 def runStabilityAnalysis():
-    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
-    results_highphi = runStabilityExperiment(phi=0.9, rho=0.5)
-    table1 = createStabilityTable(results_highphi)
-    print("\n" + table1.to_string(index=False))
-
-    print()
-
-    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
-    results_highrho = runStabilityExperiment(phi=0.5, rho=0.9)
-    table2 = createStabilityTable(results_highrho)
-    print("\n" + table2.to_string(index=False))
-
-    print()
-
-    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
-    results_lowdep = runStabilityExperiment(phi=0.0, rho=0.0)
-    table3 = createStabilityTable(results_lowdep)
-    print("\n" + table3.to_string(index=False))
+    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
+        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
+        results = runStabilityExperiment(phi=phi, rho=rho)
+        table = createStabilityTable(results)
+        print("\n" + table.to_string(index=False))
+        print()
 
 def printUsage():
     """Print usage information for the main script"""
@@ -106,54 +81,31 @@ def runAll():
     plotFWERvsPowerWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_power.png")
     print()
 
-    # 3. Run calibration curves for three scenarios
+    # 3. Run calibration curves for key scenarios
     print("Step 3: Running calibration curve experiments...")
     print("(Testing calibration at key scenarios)")
     print()
 
-    print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
-    results_highphi_cal = runCalibrationCurveExperiment(phi=0.9, rho=0.5)
-    table1 = createCalibrationTable(results_highphi_cal)
-    print("\n" + table1.to_string(index=False))
-    plotCalibrationCurves(results_highphi_cal, savePath="plots/calibration_highphi.png")
-    print()
+    scenario_names = ['highphi', 'highrho', 'lowdep']
+    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
+        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
+        results = runCalibrationCurveExperiment(phi=phi, rho=rho)
+        table = createCalibrationTable(results)
+        print("\n" + table.to_string(index=False))
+        plotCalibrationCurves(results, savePath=f"plots/calibration_{scenario_names[idx-1]}.png")
+        print()
 
-    print("    Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
-    results_highrho_cal = runCalibrationCurveExperiment(phi=0.5, rho=0.9)
-    table2 = createCalibrationTable(results_highrho_cal)
-    print("\n" + table2.to_string(index=False))
-    plotCalibrationCurves(results_highrho_cal, savePath="plots/calibration_highrho.png")
-    print()
-
-    print("    Scenario 3: No Dependence (phi=0.0, rho=0.0)")
-    results_lowdep_cal = runCalibrationCurveExperiment(phi=0.0, rho=0.0)
-    table3 = createCalibrationTable(results_lowdep_cal)
-    print("\n" + table3.to_string(index=False))
-    plotCalibrationCurves(results_lowdep_cal, savePath="plots/calibration_lowdep.png")
-    print()
-
-    # 4. Run stability analysis for three scenarios
+    # 4. Run stability analysis for key scenarios
     print("Step 4: Running stability analysis...")
     print("(Testing discovery stability at key scenarios)")
     print()
 
-    print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
-    results_highphi_stab = runStabilityExperiment(phi=0.9, rho=0.5)
-    table4 = createStabilityTable(results_highphi_stab)
-    print("\n" + table4.to_string(index=False))
-    print()
-
-    print("    Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
-    results_highrho_stab = runStabilityExperiment(phi=0.5, rho=0.9)
-    table5 = createStabilityTable(results_highrho_stab)
-    print("\n" + table5.to_string(index=False))
-    print()
-
-    print("    Scenario 3: No Dependence (phi=0.0, rho=0.0)")
-    results_lowdep_stab = runStabilityExperiment(phi=0.0, rho=0.0)
-    table6 = createStabilityTable(results_lowdep_stab)
-    print("\n" + table6.to_string(index=False))
-    print()
+    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
+        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
+        results = runStabilityExperiment(phi=phi, rho=rho)
+        table = createStabilityTable(results)
+        print("\n" + table.to_string(index=False))
+        print()
 
     print("PIPELINE COMPLETE (All plots saved)")
 
