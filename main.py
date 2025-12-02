@@ -61,9 +61,6 @@ def printUsage():
 
 def runAll():
     """Run the complete pipeline and save all plots and tables"""
-    # Create output directories
-    os.makedirs("plots", exist_ok=True)
-    os.makedirs("results", exist_ok=True)
 
     print("Step 1: Generating synthetic data...")
     clusteredDatasets = generateClusteredDatasets()
