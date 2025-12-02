@@ -75,7 +75,7 @@ def runStabilityAnalysis():
     print("\n" + table3.to_string(index=False))
 
 def printUsage():
-    """Print usage information for the main script."""
+    """Print usage information for the main script"""
     print("\nUsage: python main.py <command>")
     print("\nAvailable commands:")
     print("  data         - Generate and plot synthetic datasets")
@@ -87,19 +87,7 @@ def printUsage():
     print()
 
 def runAll():
-    """
-    Run the complete pipeline: generate data, run bootstrap grid analysis,
-    calibration curves, and stability analysis. Save all plots to the plots folder.
-    """
-    # Create plots directory if it doesn't exist
-    os.makedirs("plots", exist_ok=True)
-
-    print("=" * 60)
-    print("RUNNING COMPLETE ANALYSIS PIPELINE")
-    print("=" * 60)
-    print()
-
-    # 1. Generate and save synthetic data plots
+    """Run the complete pipeline and save all plots"""
     print("Step 1: Generating synthetic data...")
     clusteredDatasets = generateClusteredDatasets()
     plotDatasets(clusteredDatasets, savePath="plots/synthetic_datasets.png")
@@ -123,21 +111,21 @@ def runAll():
     print("(Testing calibration at key scenarios)")
     print()
 
-    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
+    print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
     results_highphi_cal = runCalibrationCurveExperiment(phi=0.9, rho=0.5)
     table1 = createCalibrationTable(results_highphi_cal)
     print("\n" + table1.to_string(index=False))
     plotCalibrationCurves(results_highphi_cal, savePath="plots/calibration_highphi.png")
     print()
 
-    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
+    print("    Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
     results_highrho_cal = runCalibrationCurveExperiment(phi=0.5, rho=0.9)
     table2 = createCalibrationTable(results_highrho_cal)
     print("\n" + table2.to_string(index=False))
     plotCalibrationCurves(results_highrho_cal, savePath="plots/calibration_highrho.png")
     print()
 
-    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
+    print("    Scenario 3: No Dependence (phi=0.0, rho=0.0)")
     results_lowdep_cal = runCalibrationCurveExperiment(phi=0.0, rho=0.0)
     table3 = createCalibrationTable(results_lowdep_cal)
     print("\n" + table3.to_string(index=False))
@@ -149,27 +137,25 @@ def runAll():
     print("(Testing discovery stability at key scenarios)")
     print()
 
-    print("Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
+    print("    Scenario 1: High Time Dependence (phi=0.9, rho=0.5)")
     results_highphi_stab = runStabilityExperiment(phi=0.9, rho=0.5)
     table4 = createStabilityTable(results_highphi_stab)
     print("\n" + table4.to_string(index=False))
     print()
 
-    print("Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
+    print("    Scenario 2: High Cross-Sectional Correlation (phi=0.5, rho=0.9)")
     results_highrho_stab = runStabilityExperiment(phi=0.5, rho=0.9)
     table5 = createStabilityTable(results_highrho_stab)
     print("\n" + table5.to_string(index=False))
     print()
 
-    print("Scenario 3: No Dependence (phi=0.0, rho=0.0)")
+    print("    Scenario 3: No Dependence (phi=0.0, rho=0.0)")
     results_lowdep_stab = runStabilityExperiment(phi=0.0, rho=0.0)
     table6 = createStabilityTable(results_lowdep_stab)
     print("\n" + table6.to_string(index=False))
     print()
 
-    print("=" * 60)
-    print("PIPELINE COMPLETE - All plots saved to 'plots/' directory")
-    print("=" * 60)
+    print("PIPELINE COMPLETE (All plots saved)")
 
 
 
