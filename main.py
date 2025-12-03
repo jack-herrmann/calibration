@@ -1,5 +1,6 @@
 import sys
 import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from generateSyntheticData import *
 from baseline import *
 from bootstrap import *
@@ -7,6 +8,26 @@ from calibration_curves import *
 from stability_analysis import *
 from plots import *
 from constants import SCENARIOS
+
+# Helper functions for parallel execution
+def _run_calibration_scenario(args):
+    """Helper function to run a single calibration scenario (for parallel execution)"""
+    idx, phi, rho, description, scenario_name = args
+    print(f"[Calibration {idx}] Starting: {description} (phi={phi}, rho={rho})")
+    results = runCalibrationCurveExperiment(phi=phi, rho=rho)
+    createCalibrationTable(results, savePath=f"results/calibration_{scenario_name}.csv")
+    plotCalibrationCurves(results, savePath=f"plots/calibration_{scenario_name}.png")
+    print(f"[Calibration {idx}] ✓ Complete: {scenario_name}")
+    return scenario_name
+
+def _run_stability_scenario(args):
+    """Helper function to run a single stability scenario (for parallel execution)"""
+    idx, phi, rho, description, scenario_name = args
+    print(f"[Stability {idx}] Starting: {description} (phi={phi}, rho={rho})")
+    results = runStabilityExperiment(phi=phi, rho=rho)
+    createStabilityTable(results, savePath=f"results/stability_{scenario_name}.csv")
+    print(f"[Stability {idx}] ✓ Complete: {scenario_name}")
+    return scenario_name
 
 def runGenerateData():
     clusteredDatasets = generateClusteredDatasets()
@@ -82,29 +103,44 @@ def runAll():
     plotFWERvsPowerWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_power.png")
     print()
 
-    # 3. Run calibration curves for key scenarios
-    print("Step 3: Running calibration curve experiments...")
-    print("(Testing calibration at key scenarios)")
+    # 3. Run calibration curves for key scenarios (PARALLEL)
+    print("Step 3: Running calibration curve experiments in parallel...")
+    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
     print()
 
     scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
-    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
-        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
-        results = runCalibrationCurveExperiment(phi=phi, rho=rho)
-        createCalibrationTable(results, savePath=f"results/calibration_{scenario_names[idx-1]}.csv")
-        plotCalibrationCurves(results, savePath=f"plots/calibration_{scenario_names[idx-1]}.png")
-        print()
+    calibration_tasks = [
+        (idx, phi, rho, description, scenario_names[idx-1])
+        for idx, (phi, rho, description) in enumerate(SCENARIOS, 1)
+    ]
 
-    # 4. Run stability analysis for key scenarios
-    print("Step 4: Running stability analysis...")
-    print("(Testing discovery stability at key scenarios)")
+    with ProcessPoolExecutor(max_workers=len(SCENARIOS)) as executor:
+        futures = [executor.submit(_run_calibration_scenario, task) for task in calibration_tasks]
+        for future in as_completed(futures):
+            scenario_name = future.result()
+            # Results already logged by worker
+
+    print(f"✓ All {len(SCENARIOS)} calibration scenarios complete")
     print()
 
-    for idx, (phi, rho, description) in enumerate(SCENARIOS, 1):
-        print(f"Scenario {idx}: {description} (phi={phi}, rho={rho})")
-        results = runStabilityExperiment(phi=phi, rho=rho)
-        createStabilityTable(results, savePath=f"results/stability_{scenario_names[idx-1]}.csv")
-        print()
+    # 4. Run stability analysis for key scenarios (PARALLEL)
+    print("Step 4: Running stability analysis in parallel...")
+    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
+    print()
+
+    stability_tasks = [
+        (idx, phi, rho, description, scenario_names[idx-1])
+        for idx, (phi, rho, description) in enumerate(SCENARIOS, 1)
+    ]
+
+    with ProcessPoolExecutor(max_workers=len(SCENARIOS)) as executor:
+        futures = [executor.submit(_run_stability_scenario, task) for task in stability_tasks]
+        for future in as_completed(futures):
+            scenario_name = future.result()
+            # Results already logged by worker
+
+    print(f"✓ All {len(SCENARIOS)} stability scenarios complete")
+    print()
 
     print("=" * 60)
     print("PIPELINE COMPLETE")
