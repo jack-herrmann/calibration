@@ -245,6 +245,26 @@ def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBoo
 
     return summary
 
+def _run_bootstrap_scenario(args):
+    """Helper function to run a single bootstrap scenario (for parallel execution)"""
+    phi, rho, varied_param = args
+    summary = monteCarloWithBootstrap(phi=phi, rho=rho)
+
+    # Add metadata
+    for method in summary:
+        if varied_param == 'phi':
+            summary[method]['scenario'] = f'phi={phi}'
+            summary[method]['varied_param'] = 'phi'
+            summary[method]['phi'] = phi
+            summary[method]['rho'] = rho
+        else:  # varied_param == 'rho'
+            summary[method]['scenario'] = f'rho={rho}'
+            summary[method]['varied_param'] = 'rho'
+            summary[method]['phi'] = phi
+            summary[method]['rho'] = rho
+
+    return summary
+
 def runFullGridWithBootstrap():
     allResults = []
 
@@ -273,6 +293,27 @@ def runFullGridWithBootstrap():
         allResults.append(summary)
 
     return allResults
+
+def runFullGridWithBootstrapParallel():
+    """Parallel version of runFullGridWithBootstrap for use in runAll()"""
+    from concurrent.futures import ProcessPoolExecutor
+
+    # Create tasks: 4 phi sweeps + 4 rho sweeps
+    tasks = []
+
+    # Varying phi (with fixed rho)
+    for phi in PHI_LEVELS:
+        tasks.append((phi, BASERHO, 'phi'))
+
+    # Varying rho (with fixed phi)
+    for rho in RHO_LEVELS:
+        tasks.append((BASEPHI, rho, 'rho'))
+
+    # Run in parallel
+    with ProcessPoolExecutor(max_workers=len(tasks)) as executor:
+        results = list(executor.map(_run_bootstrap_scenario, tasks))
+
+    return results
 
 def createSummaryTableWithBootstrap(allResults, savePath=None):
 

@@ -91,11 +91,12 @@ def runAll():
     plotDatasets(clusteredDatasets, savePath="plots/synthetic_datasets.png")
     print()
 
-    # 2. Run bootstrap grid analysis
-    print("Step 2: Running bootstrap grid analysis...")
-    print("(Testing all methods across parameter space)")
-    allResultsBootstrap = runFullGridWithBootstrap()
+    # 2. Run bootstrap grid analysis (PARALLEL)
+    print("Step 2: Running bootstrap grid analysis in parallel...")
+    print("(Testing 8 scenarios: 4 phi sweeps + 4 rho sweeps concurrently)")
+    allResultsBootstrap = runFullGridWithBootstrapParallel()
     createSummaryTableWithBootstrap(allResultsBootstrap, savePath="results/bootstrap_grid_summary.csv")
+    print(f"✓ Bootstrap grid analysis complete")
     print()
 
     plotFWERvsDependenceWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_dependence.png")
