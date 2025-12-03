@@ -23,9 +23,9 @@ PERIOD = 50
 BASEPHI = 0.5
 BASERHO = 0.5
 STRENGTH = 0.15
-NUMBERTRUE = 1
-NUMBERCLUSTERS = 2
-FIRMSPERCLUSTER = 3
+NUMBERTRUE = 2
+NUMBERCLUSTERS = 5
+FIRMSPERCLUSTER = 5
 
 # Grid sweep parameters (for baseline and bootstrap analyses)
 PHI_LEVELS = [0.0, 0.3, 0.6, 0.9]
