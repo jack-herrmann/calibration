@@ -9,6 +9,15 @@ from constants import (
 )
 
 def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap=NUMBERBOOTSTRAP_STABILITY, method='Bootstrap-RomanoWolf'):
+    """
+    Measure discovery stability: "Do rejections from original data persist in resamples?"
+
+    KEY CONCEPT: Resample ORIGINAL data (preserving signal structure) and count how often
+    each hypothesis gets rejected across bootstrap samples. True signals should have high
+    survivor rates; false positives should be fragile.
+
+    This is NOT a null bootstrap - we preserve the planted signals to test reproducibility.
+    """
     K = data.shape[1]
 
     # original data rejections
@@ -27,45 +36,34 @@ def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, n
     else:
         raise ValueError(f"Unknown method: {method}")
 
-    if 'Bootstrap' in method:
-        centeredData = data - np.mean(data, axis=0, keepdims=True)
-        bootstrapSamples = movingBlockClusterBootstrap(centeredData, clusterLabels, blockLength, numberBootstrap)
+    # CRITICAL FIX: Resample ORIGINAL data (not centered!) to preserve signal structure
+    # This tests: "Do my discoveries persist when I perturb the data?"
+    bootstrapSamples = movingBlockClusterBootstrap(data, clusterLabels, blockLength, numberBootstrap)
 
-        rejectionMatrix = np.zeros((numberBootstrap, K), dtype=bool)
-        pvalMatrix = np.zeros((numberBootstrap, K))
+    rejectionMatrix = np.zeros((numberBootstrap, K), dtype=bool)
+    pvalMatrix = np.zeros((numberBootstrap, K))
 
-        # Compute threshold once from original data (not inside loop!)
-        if method == 'Bootstrap-Single':
-            _, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+    # For bootstrap methods, compute threshold once from original data
+    if method == 'Bootstrap-Single':
+        _, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
 
-        for b, bootData in enumerate(bootstrapSamples):
-            bootTStats, bootPVals = computeTestStatistics(bootData)
-            pvalMatrix[b, :] = bootPVals
+    for b, bootData in enumerate(bootstrapSamples):
+        bootTStats, bootPVals = computeTestStatistics(bootData)
+        pvalMatrix[b, :] = bootPVals
 
-            if method == 'Bootstrap-Single':
-                # Use pre-computed tStar (not recompute!)
-                rejectionMatrix[b, :] = np.abs(bootTStats) > tStar
-            elif method == 'Bootstrap-RomanoWolf':
-                # For RW, use simple percentile threshold to avoid bootstrap-within-bootstrap
-                threshold = np.percentile(np.abs(bootTStats), 100 * (1 - alpha))
-                rejectionMatrix[b, :] = np.abs(bootTStats) > threshold
-    else:
-        centeredData = data - np.mean(data, axis=0, keepdims=True)
-        bootstrapSamples = movingBlockClusterBootstrap(centeredData, clusterLabels, blockLength, numberBootstrap)
-
-        rejectionMatrix = np.zeros((numberBootstrap, K), dtype=bool)
-        pvalMatrix = np.zeros((numberBootstrap, K))
-
-        for b, bootData in enumerate(bootstrapSamples):
-            _, bootPVals = computeTestStatistics(bootData)
-            pvalMatrix[b, :] = bootPVals
-
-            if method == 'Bonferroni':
-                rejectionMatrix[b, :] = bonferroni(bootPVals, alpha)
-            elif method == 'Holm':
-                rejectionMatrix[b, :] = holm(bootPVals, alpha)
-            elif method == 'BH':
-                rejectionMatrix[b, :] = benjaminiHochberg(bootPVals, alpha)
+        if method == 'Bonferroni':
+            rejectionMatrix[b, :] = bonferroni(bootPVals, alpha)
+        elif method == 'Holm':
+            rejectionMatrix[b, :] = holm(bootPVals, alpha)
+        elif method == 'BH':
+            rejectionMatrix[b, :] = benjaminiHochberg(bootPVals, alpha)
+        elif method == 'Bootstrap-Single':
+            # Use pre-computed tStar from original data
+            rejectionMatrix[b, :] = np.abs(bootTStats) > tStar
+        elif method == 'Bootstrap-RomanoWolf':
+            # For RW, use simple percentile threshold to avoid bootstrap-within-bootstrap
+            threshold = np.percentile(np.abs(bootTStats), 100 * (1 - alpha))
+            rejectionMatrix[b, :] = np.abs(bootTStats) > threshold
 
     # compute stability metrics
     survivorRate = np.mean(rejectionMatrix, axis=0)
