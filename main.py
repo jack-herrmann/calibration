@@ -153,6 +153,7 @@ def runStep4():
     print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
     print()
 
+    scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
     stability_tasks = [
         (idx, phi, rho, description, scenario_names[idx-1])
         for idx, (phi, rho, description) in enumerate(SCENARIOS, 1)
