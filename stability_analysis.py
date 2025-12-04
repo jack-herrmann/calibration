@@ -5,10 +5,10 @@ from bootstrap import *
 from generateSyntheticData import *
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
-    ALPHALEVELS, NUMBERREPS_STABILITY, NUMBERBOOTSTRAP, computeBlockLength
+    ALPHALEVELS, NUMBERREPS_STABILITY, NUMBERBOOTSTRAP_STABILITY, computeBlockLength
 )
 
-def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap=NUMBERBOOTSTRAP, method='Bootstrap-RomanoWolf'):
+def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap=NUMBERBOOTSTRAP_STABILITY, method='Bootstrap-RomanoWolf'):
     K = data.shape[1]
 
     # original data rejections
@@ -118,7 +118,7 @@ def createStabilityTable(stabilityResults, savePath=None):
 
     return df
 
-def runStabilityExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS_STABILITY, numberBootstrap=NUMBERBOOTSTRAP, blockLength=None):
+def runStabilityExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS_STABILITY, numberBootstrap=NUMBERBOOTSTRAP_STABILITY, blockLength=None):
     # Compute optimal block length based on phi if not provided
     if blockLength is None:
         blockLength = computeBlockLength(phi)
