@@ -146,7 +146,32 @@ def runAll():
     print("  Tables saved to: results/")
     print("=" * 60)
 
+def runStep4():
 
+    # 4. Run stability analysis for key scenarios (PARALLEL)
+    print("Step 4: Running stability analysis in parallel...")
+    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
+    print()
+
+    stability_tasks = [
+        (idx, phi, rho, description, scenario_names[idx-1])
+        for idx, (phi, rho, description) in enumerate(SCENARIOS, 1)
+    ]
+
+    with ProcessPoolExecutor(max_workers=len(SCENARIOS)) as executor:
+        futures = [executor.submit(_run_stability_scenario, task) for task in stability_tasks]
+        for future in as_completed(futures):
+            scenario_name = future.result()
+            # Results already logged by worker
+
+    print(f"✓ All {len(SCENARIOS)} stability scenarios complete")
+    print()
+
+    print("=" * 60)
+    print("PIPELINE COMPLETE")
+    print("  Plots saved to: plots/")
+    print("  Tables saved to: results/")
+    print("=" * 60)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -167,6 +192,8 @@ if __name__ == "__main__":
         runStabilityAnalysis()
     elif command == "all":
         runAll()
+    elif command == "four":
+        runStep4()
     else:
         print(f"\nError: Unknown command '{command}'")
         printUsage()
