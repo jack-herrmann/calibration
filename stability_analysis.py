@@ -34,15 +34,19 @@ def analyzeDiscoveryStability(data, clusterLabels, isTrue, alpha, blockLength, n
         rejectionMatrix = np.zeros((numberBootstrap, K), dtype=bool)
         pvalMatrix = np.zeros((numberBootstrap, K))
 
+        # Compute threshold once from original data (not inside loop!)
+        if method == 'Bootstrap-Single':
+            _, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+
         for b, bootData in enumerate(bootstrapSamples):
             bootTStats, bootPVals = computeTestStatistics(bootData)
             pvalMatrix[b, :] = bootPVals
 
             if method == 'Bootstrap-Single':
-                _, tStar, _ = applyBootstrapCalibration(data, clusterLabels, isTrue, alpha, blockLength, numberBootstrap)
+                # Use pre-computed tStar (not recompute!)
                 rejectionMatrix[b, :] = np.abs(bootTStats) > tStar
             elif method == 'Bootstrap-RomanoWolf':
-                maxStat = np.max(np.abs(bootTStats))
+                # For RW, use simple percentile threshold to avoid bootstrap-within-bootstrap
                 threshold = np.percentile(np.abs(bootTStats), 100 * (1 - alpha))
                 rejectionMatrix[b, :] = np.abs(bootTStats) > threshold
     else:
