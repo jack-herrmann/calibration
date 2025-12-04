@@ -7,19 +7,80 @@ from constants import (
 )
 
 def computeTestStatistics(data):
-    _, signals = data.shape
+    """
+    Compute test statistics using prewhitening to handle autocorrelation.
+
+    Fits an AR(1) model to each series, then tests if the intercept is
+    significantly different from zero. This properly accounts for strong
+    time-series dependence.
+    """
+    T, signals = data.shape
     tStats = np.zeros(signals)
     pVals = np.zeros(signals)
-    
+
     for i in range(signals):
-        signal = data[:, i]
-        
-        # deviation from mean, 0 in this null hypothesis case
-        tStat, pVal = stats.ttest_1samp(signal, 0)
-        
+        y = data[:, i]
+
+        # Fit AR(1) model: y_t = mu + phi * y_{t-1} + epsilon_t
+        # Rearrange: y_t - phi * y_{t-1} = mu + epsilon_t
+        # Estimate phi using OLS on differenced equation
+
+        # Step 1: Estimate phi using Yule-Walker equations
+        y_mean = np.mean(y)
+        y_centered = y - y_mean
+
+        # Lag-1 autocovariance and variance
+        gamma_0 = np.mean(y_centered ** 2)
+        gamma_1 = np.mean(y_centered[1:] * y_centered[:-1])
+
+        # AR(1) coefficient estimate
+        if gamma_0 > 0:
+            phi_hat = gamma_1 / gamma_0
+            # Stabilize: bound phi to (-0.99, 0.99) to avoid numerical issues
+            phi_hat = max(-0.99, min(0.99, phi_hat))
+        else:
+            phi_hat = 0.0
+
+        # Step 2: Estimate mu accounting for AR(1) structure
+        # Under AR(1): E[y_t] = mu / (1 - phi)
+        # So mu = E[y_t] * (1 - phi)
+        mu_hat = y_mean * (1 - phi_hat)
+
+        # Step 3: Compute prewhitened residuals
+        # epsilon_t = y_t - mu - phi * y_{t-1}
+        epsilon = np.zeros(T)
+        epsilon[0] = y[0] - mu_hat / (1 - phi_hat) if abs(phi_hat) < 0.99 else y[0] - y_mean
+        for t in range(1, T):
+            epsilon[t] = y[t] - mu_hat - phi_hat * y[t-1]
+
+        # Step 4: Test H0: mu = 0 using prewhitened residuals
+        # The residuals should be approximately i.i.d. after prewhitening
+        # t-statistic for mu: t = mu_hat / SE(mu_hat)
+
+        # Standard error of mu under AR(1):
+        # Var(mu_hat) ≈ sigma^2 * (1 - phi^2) / (T * (1 - phi)^2)
+        sigma_sq = np.var(epsilon, ddof=1)  # Use ddof=1 for unbiased estimate
+
+        # Effective sample size adjustment for AR(1)
+        if abs(phi_hat) < 0.99:
+            se_mu = np.sqrt(sigma_sq * (1 + phi_hat) / (T * (1 - phi_hat)))
+        else:
+            # For phi close to 1, use more conservative SE
+            se_mu = np.sqrt(sigma_sq / T) * np.sqrt(T / 2)  # Very conservative
+
+        # t-statistic
+        if se_mu > 0:
+            tStat = mu_hat / se_mu
+        else:
+            tStat = 0.0
+
+        # Two-tailed p-value (use T-2 degrees of freedom to account for estimated phi)
+        df = max(1, T - 2)
+        pVal = 2 * (1 - stats.t.cdf(np.abs(tStat), df))
+
         tStats[i] = tStat
         pVals[i] = pVal
-    
+
     return tStats, pVals
 
 # control FWER
