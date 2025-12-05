@@ -6,59 +6,49 @@ from constants import (
     BASEPHI, BASERHO, ALPHA, NUMBERREPS, PHI_LEVELS, RHO_LEVELS
 )
 
-#compute test statistics using prewhitening to handle autocorrelation
+# t-stat function (copied from src/eval/stats.py to avoid import issues)
+def hac_t_stat(returns, max_lag=6):
+    """Compute a Newey-West HAC standard error and t-stat for the mean."""
+    if isinstance(returns, pd.Series):
+        r = returns.to_numpy(dtype=float)
+    else:
+        r = np.asarray(returns, dtype=float)
+
+    T = r.shape[0]
+    if T < 2:
+        return np.nan
+
+    mu_hat = r.mean()
+    eps = r - mu_hat
+
+    gamma0 = np.dot(eps, eps) / T
+    var_hat = gamma0
+    for lag in range(1, min(max_lag, T - 1) + 1):
+        cov = np.dot(eps[lag:], eps[:-lag]) / T
+        weight = 1.0 - lag / (max_lag + 1.0)
+        var_hat += 2.0 * weight * cov
+
+    se = np.sqrt(var_hat / T)
+    if se == 0:
+        return np.nan
+
+    return float(mu_hat / se)
+
 def computeTestStatistics(data):
     T, signals = data.shape
     tStats = np.zeros(signals)
     pVals = np.zeros(signals)
 
     for i in range(signals):
-        y = data[:, i]
-        y_mean = np.mean(y)
-        y_centered = y - y_mean
+        tStats[i] = hac_t_stat(data[:, i], max_lag=6)
 
-        # lag-1 autocovariance and variance
-        gamma_0 = np.mean(y_centered ** 2)
-        gamma_1 = np.mean(y_centered[1:] * y_centered[:-1])
+        df = max(1, T - 1)
 
-        # AR(1) coefficient estimate
-        if gamma_0 > 0:
-            phi_hat = gamma_1 / gamma_0
-            # stabilize
-            phi_hat = max(-0.99, min(0.99, phi_hat))
+        if np.isnan(tStats[i]):
+            tStats[i] = 0.0
+            pVals[i] = 1.0
         else:
-            phi_hat = 0.0
-
-        # estimate mu accounting for AR(1) structure
-        mu_hat = y_mean * (1 - phi_hat)
-
-        # compute prewhitened residuals
-        epsilon = np.zeros(T)
-        epsilon[0] = y[0] - mu_hat / (1 - phi_hat) if abs(phi_hat) < 0.99 else y[0] - y_mean
-        for t in range(1, T):
-            epsilon[t] = y[t] - mu_hat - phi_hat * y[t-1]
-
-        # standard error of mu under AR(1):
-        sigma_sq = np.var(epsilon, ddof=1)
-
-        # effective sample size adjustment for AR(1)
-        if abs(phi_hat) < 0.99:
-            se_mu = np.sqrt(sigma_sq * (1 + phi_hat) / (T * (1 - phi_hat)))
-        else:
-            se_mu = np.sqrt(sigma_sq / T) * np.sqrt(T / 2)  # very conservative
-
-        # t-statistic
-        if se_mu > 0:
-            tStat = mu_hat / se_mu
-        else:
-            tStat = 0.0
-
-        # two-tailed p-value
-        df = max(1, T - 2)
-        pVal = 2 * (1 - stats.t.cdf(np.abs(tStat), df))
-
-        tStats[i] = tStat
-        pVals[i] = pVal
+            pVals[i] = 2 * (1 - stats.t.cdf(np.abs(tStats[i]), df))
 
     return tStats, pVals
 
