@@ -5,7 +5,7 @@ from constants import (
     BASEPHI, BASERHO, PHI_LEVELS, RHO_LEVELS
 )
 
-np.random.seed(73)
+#np.random.seed(73)
 
 # generate one independent AR1 series
 def generateTimeDependentSeries(time, phi):

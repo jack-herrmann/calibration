@@ -13,20 +13,20 @@ NUMBERREPS = 500
 NUMBERREPS_STABILITY = 250  # fewer reps for stability
 
 # Bootstrap parameters
-NUMBERBOOTSTRAP = 200
-NUMBERBOOTSTRAP_STABILITY = 100  # reduced for stability
+NUMBERBOOTSTRAP = 300
+NUMBERBOOTSTRAP_STABILITY = 150  # reduced for stability
 MIN_BLOCKLENGTH = 2  # minimum block length to avoid degenerate cases
 MAX_BLOCKLENGTH = 50  # maximum to avoid extremely long blocks
 
 # Data generation parameters
-TIME = 200
+TIME = 250
 PERIOD = 50
-BASEPHI = 0.5
-BASERHO = 0.5
-STRENGTH = 0.15
-NUMBERTRUE = 2
-NUMBERCLUSTERS = 5
-FIRMSPERCLUSTER = 5
+BASEPHI = 0.3
+BASERHO = 0.3
+STRENGTH = 0.5
+NUMBERTRUE = 1
+NUMBERCLUSTERS = 10
+FIRMSPERCLUSTER = 30
 
 # Grid sweep parameters (for baseline and bootstrap analyses)
 PHI_LEVELS = [0.0, 0.3, 0.6, 0.9]
