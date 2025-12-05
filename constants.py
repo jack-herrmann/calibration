@@ -8,13 +8,13 @@ import numpy as np
 
 # Experiment parameters
 ALPHA = 0.05
-ALPHALEVELS = [0.01, 0.025, 0.05]  # For calibration curves and stability (reduced for efficiency)
+ALPHALEVELS = [0.01, 0.025, 0.05]  # for calibration curves and stability (reduced for efficiency)
 NUMBERREPS = 500
-NUMBERREPS_STABILITY = 250  # fewer reps for stability (computationally expensive)
+NUMBERREPS_STABILITY = 250  # fewer reps for stability
 
 # Bootstrap parameters
 NUMBERBOOTSTRAP = 200
-NUMBERBOOTSTRAP_STABILITY = 100  # Reduced for stability (2x speedup, sufficient precision)
+NUMBERBOOTSTRAP_STABILITY = 100  # reduced for stability
 MIN_BLOCKLENGTH = 2  # minimum block length to avoid degenerate cases
 MAX_BLOCKLENGTH = 50  # maximum to avoid extremely long blocks
 
