@@ -1,4 +1,5 @@
 import numpy as np
+from concurrent.futures import ProcessPoolExecutor
 from baseline import *
 from constants import (
     TIME, NUMBERCLUSTERS, FIRMSPERCLUSTER, NUMBERTRUE, STRENGTH,
@@ -91,20 +92,17 @@ def computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap):
 
     return np.array(maxStats)
 
-# compute the effective number of independent tests
 def effectiveNumberTests(maxStats, alpha, K, df):
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    # we use logsf for better numerical stability
+    # log for numerical stability
     log_p_one_tail = stats.t.logsf(tStar, df=df)
     log_p_two_tail = np.log(2) + log_p_one_tail
 
-    # if log_p < -10, we'll use the approximation
     if log_p_two_tail < -10:
-        denom = -np.exp(log_p_two_tail)
+        denom = -np.exp(log_p_two_tail) # approximation
     else:
         p = np.exp(log_p_two_tail)
-        # Clip p to avoid log(0) if p is exactly 1 (unlikely with tStar > 0)
         p = np.clip(p, 0, 1 - 1e-16)
         denom = np.log1p(-p)
 
@@ -120,13 +118,13 @@ def effectiveNumberTests(maxStats, alpha, K, df):
     return kEff
 
 def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=None, numberBootstrap=NUMBERBOOTSTRAP):
-    # blockLength should be passed explicitly by caller based on phi
     if blockLength is None:
-        raise ValueError("blockLength must be provided (compute using computeBlockLength(phi))")
+        raise ValueError("blockLength must be provided")
+
     maxStats = computeBootstrapMaxStats(data, clusterLabels, blockLength, numberBootstrap)
     tStar = np.percentile(maxStats, 100 * (1 - alpha))
 
-    tStats, _ = computeTestStatistics(data) #  test statistics on original data
+    tStats, _ = computeTestStatistics(data) # test statistics on original data
     K = len(tStats)
     degreesFreedom = data.shape[0] - 1
 
@@ -140,9 +138,9 @@ def applyBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLen
     return performance, tStar, rejected
 
 def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA, blockLength=None, numberBootstrap=NUMBERBOOTSTRAP):
-    # blockLength should be passed explicitly by caller based on phi
     if blockLength is None:
-        raise ValueError("blockLength must be provided (compute using computeBlockLength(phi))")
+        raise ValueError("blockLength must be provided")
+
     tStats, _ = computeTestStatistics(data)
     K = len(tStats)
 
@@ -181,7 +179,6 @@ def applyRomanoWolfBootstrapCalibration(data, clusterLabels, isTrue, alpha=ALPHA
     return performance, rejected, kEff
 
 def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=None):
-    # Compute optimal block length based on phi if not provided
     if blockLength is None:
         blockLength = computeBlockLength(phi)
 
@@ -204,7 +201,7 @@ def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBoo
 
         for methodName, methodFunc in methods.items():
             if 'Bootstrap' in methodName:
-                continue # needs special handling below
+                continue # special handling below
 
             rejected = methodFunc(pVals, alpha)
             performance = measurePerformance(rejected, isTrue)
@@ -262,11 +259,9 @@ def monteCarloWithBootstrap(phi, rho, alpha=ALPHA, numReps=NUMBERREPS, numberBoo
     return summary
 
 def _run_bootstrap_scenario(args):
-    """Helper function to run a single bootstrap scenario (for parallel execution)"""
     phi, rho, varied_param = args
     summary = monteCarloWithBootstrap(phi=phi, rho=rho)
 
-    # Add metadata
     for method in summary:
         if varied_param == 'phi':
             summary[method]['scenario'] = f'phi={phi}'
@@ -311,28 +306,20 @@ def runFullGridWithBootstrap():
     return allResults
 
 def runFullGridWithBootstrapParallel():
-    """Parallel version of runFullGridWithBootstrap for use in runAll()"""
-    from concurrent.futures import ProcessPoolExecutor
-
-    # Create tasks: 4 phi sweeps + 4 rho sweeps
     tasks = []
 
-    # Varying phi (with fixed rho)
     for phi in PHI_LEVELS:
         tasks.append((phi, BASERHO, 'phi'))
 
-    # Varying rho (with fixed phi)
     for rho in RHO_LEVELS:
         tasks.append((BASEPHI, rho, 'rho'))
 
-    # Run in parallel
     with ProcessPoolExecutor(max_workers=len(tasks)) as executor:
         results = list(executor.map(_run_bootstrap_scenario, tasks))
 
     return results
 
 def createSummaryTableWithBootstrap(allResults, savePath=None):
-
     rows = []
     for scenarioResults in allResults:
         for method, stats in scenarioResults.items():
@@ -374,6 +361,6 @@ def createSummaryTableWithBootstrap(allResults, savePath=None):
 
     if savePath:
         dataframe.to_csv(savePath, index=False)
-        print(f"✓ Table saved: {savePath}")
+        print(f"Table saved: {savePath}")
 
     return dataframe

@@ -9,24 +9,26 @@ from stability_analysis import *
 from plots import *
 from constants import SCENARIOS
 
-# Helper functions for parallel execution
+# helper functions for parallel execution
 def _run_calibration_scenario(args):
-    """Helper function to run a single calibration scenario (for parallel execution)"""
     idx, phi, rho, description, scenario_name = args
     print(f"[Calibration {idx}] Starting: {description} (phi={phi}, rho={rho})")
+
     results = runCalibrationCurveExperiment(phi=phi, rho=rho)
     createCalibrationTable(results, savePath=f"results/calibration_{scenario_name}.csv")
     plotCalibrationCurves(results, savePath=f"plots/calibration_{scenario_name}.png")
-    print(f"[Calibration {idx}] ✓ Complete: {scenario_name}")
+    print(f"[Calibration {idx}] Complete: {scenario_name}")
+
     return scenario_name
 
 def _run_stability_scenario(args):
-    """Helper function to run a single stability scenario (for parallel execution)"""
     idx, phi, rho, description, scenario_name = args
     print(f"[Stability {idx}] Starting: {description} (phi={phi}, rho={rho})")
+
     results = runStabilityExperiment(phi=phi, rho=rho)
     createStabilityTable(results, savePath=f"results/stability_{scenario_name}.csv")
-    print(f"[Stability {idx}] ✓ Complete: {scenario_name}")
+    print(f"[Stability {idx}] Complete: {scenario_name}")
+
     return scenario_name
 
 def runGenerateData():
@@ -68,32 +70,17 @@ def runStabilityAnalysis():
         createStabilityTable(results, savePath=f"results/stability_{scenario_names[idx-1]}.csv")
         print()
 
-def printUsage():
-    """Print usage information for the main script"""
-    print("\nUsage: python main.py <command>")
-    print("\nAvailable commands:")
-    print("  data         - Generate and plot synthetic datasets")
-    print("  baseline     - Run baseline analysis with classical methods")
-    print("  bootstrap    - Run bootstrap analysis")
-    print("  calibration  - Run calibration curve experiments")
-    print("  stability    - Run stability analysis")
-    print("  all          - Run complete pipeline (data, bootstrap, calibration, stability) and save all plots")
-    print()
-
 def runAll():
-    """Run the complete pipeline and save all plots and tables"""
-
-    print("Step 1: Generating synthetic data...")
+    print("1/4: Generating synthetic data...")
     clusteredDatasets = generateClusteredDatasets()
     plotDatasets(clusteredDatasets, savePath="plots/synthetic_datasets.png")
     print()
 
-    # 2. Run bootstrap grid analysis (PARALLEL)
-    print("Step 2: Running bootstrap grid analysis in parallel...")
+    print("2/4: Running bootstrap grid analysis...")
     print("(Testing 8 scenarios: 4 phi sweeps + 4 rho sweeps concurrently)")
     allResultsBootstrap = runFullGridWithBootstrapParallel()
     createSummaryTableWithBootstrap(allResultsBootstrap, savePath="results/bootstrap_grid_summary.csv")
-    print(f"✓ Bootstrap grid analysis complete")
+    print(f"Bootstrap grid analysis complete")
     print()
 
     plotFWERvsDependenceWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_dependence.png")
@@ -101,9 +88,7 @@ def runAll():
     plotFWERvsPowerWithBootstrap(allResultsBootstrap, savePath="plots/bootstrap_fwer_vs_power.png")
     print()
 
-    # 3. Run calibration curves for key scenarios (PARALLEL)
-    print("Step 3: Running calibration curve experiments in parallel...")
-    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
+    print("3/4: Running calibration curve experiments...")
     print()
 
     scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
@@ -116,14 +101,8 @@ def runAll():
         futures = [executor.submit(_run_calibration_scenario, task) for task in calibration_tasks]
         for future in as_completed(futures):
             scenario_name = future.result()
-            # Results already logged by worker
 
-    print(f"✓ All {len(SCENARIOS)} calibration scenarios complete")
-    print()
-
-    # 4. Run stability analysis for key scenarios (PARALLEL)
-    print("Step 4: Running stability analysis in parallel...")
-    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
+    print("4/4: Running stability analysis...")
     print()
 
     stability_tasks = [
@@ -135,23 +114,13 @@ def runAll():
         futures = [executor.submit(_run_stability_scenario, task) for task in stability_tasks]
         for future in as_completed(futures):
             scenario_name = future.result()
-            # Results already logged by worker
 
-    print(f"✓ All {len(SCENARIOS)} stability scenarios complete")
     print()
 
-    print("=" * 60)
     print("PIPELINE COMPLETE")
-    print("  Plots saved to: plots/")
-    print("  Tables saved to: results/")
-    print("=" * 60)
 
 def runStep4():
-
-    # 4. Run stability analysis for key scenarios (PARALLEL)
-    print("Step 4: Running stability analysis in parallel...")
-    print(f"(Running {len(SCENARIOS)} scenarios concurrently)")
-    print()
+    print("Running stability analysis...")
 
     scenario_names = ['worstcase', 'highphi', 'highrho', 'baseline']
     stability_tasks = [
@@ -163,20 +132,11 @@ def runStep4():
         futures = [executor.submit(_run_stability_scenario, task) for task in stability_tasks]
         for future in as_completed(futures):
             scenario_name = future.result()
-            # Results already logged by worker
 
-    print(f"✓ All {len(SCENARIOS)} stability scenarios complete")
-    print()
-
-    print("=" * 60)
     print("PIPELINE COMPLETE")
-    print("  Plots saved to: plots/")
-    print("  Tables saved to: results/")
-    print("=" * 60)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        printUsage()
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -197,5 +157,4 @@ if __name__ == "__main__":
         runStep4()
     else:
         print(f"\nError: Unknown command '{command}'")
-        printUsage()
         sys.exit(1)

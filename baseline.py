@@ -6,14 +6,8 @@ from constants import (
     BASEPHI, BASERHO, ALPHA, NUMBERREPS, PHI_LEVELS, RHO_LEVELS
 )
 
+#compute test statistics using prewhitening to handle autocorrelation
 def computeTestStatistics(data):
-    """
-    Compute test statistics using prewhitening to handle autocorrelation.
-
-    Fits an AR(1) model to each series, then tests if the intercept is
-    significantly different from zero. This properly accounts for strong
-    time-series dependence.
-    """
     T, signals = data.shape
     tStats = np.zeros(signals)
     pVals = np.zeros(signals)
@@ -30,7 +24,7 @@ def computeTestStatistics(data):
         # AR(1) coefficient estimate
         if gamma_0 > 0:
             phi_hat = gamma_1 / gamma_0
-            # stabilize: bound phi to (-0.99, 0.99) to avoid numerical issues
+            # stabilize
             phi_hat = max(-0.99, min(0.99, phi_hat))
         else:
             phi_hat = 0.0
@@ -44,9 +38,6 @@ def computeTestStatistics(data):
         for t in range(1, T):
             epsilon[t] = y[t] - mu_hat - phi_hat * y[t-1]
 
-        # test H0: mu = 0 using prewhitened residuals that should be approximately i.i.d.
-        # t-statistic for mu: t = mu_hat / SE(mu_hat)
-
         # standard error of mu under AR(1):
         sigma_sq = np.var(epsilon, ddof=1)
 
@@ -54,7 +45,7 @@ def computeTestStatistics(data):
         if abs(phi_hat) < 0.99:
             se_mu = np.sqrt(sigma_sq * (1 + phi_hat) / (T * (1 - phi_hat)))
         else:
-            se_mu = np.sqrt(sigma_sq / T) * np.sqrt(T / 2)  # Very conservative
+            se_mu = np.sqrt(sigma_sq / T) * np.sqrt(T / 2)  # very conservative
 
         # t-statistic
         if se_mu > 0:
@@ -62,7 +53,7 @@ def computeTestStatistics(data):
         else:
             tStat = 0.0
 
-        # Two-tailed p-value (use T-2 degrees of freedom to account for estimated phi)
+        # two-tailed p-value
         df = max(1, T - 2)
         pVal = 2 * (1 - stats.t.cdf(np.abs(tStat), df))
 
@@ -233,6 +224,6 @@ def createSummaryTable(allResults, savePath=None):
 
     if savePath:
         dataframe.to_csv(savePath, index=False)
-        print(f"✓ Table saved: {savePath}")
+        print(f"Table saved: {savePath}")
 
     return dataframe

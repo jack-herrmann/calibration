@@ -10,7 +10,6 @@ from constants import (
 )
 
 def runCalibrationCurveExperiment(phi, rho, alphaLevels=ALPHALEVELS, numReps=NUMBERREPS, numberBootstrap=NUMBERBOOTSTRAP, blockLength=None):
-    # Compute optimal block length based on phi if not provided
     if blockLength is None:
         blockLength = computeBlockLength(phi)
         print(f"Using block length = {blockLength} (computed from phi={phi})")
@@ -100,6 +99,6 @@ def createCalibrationTable(calibrationResults, savePath=None):
 
     if savePath:
         dataframe.to_csv(savePath, index=False)
-        print(f"✓ Table saved: {savePath}")
+        print(f"Table saved: {savePath}")
 
     return dataframe

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from constants import PERIOD, PHI_LEVELS, RHO_LEVELS
 
-# Plot function from generateSyntheticData.py
+# Plot functions from generateSyntheticData.py
 def plotDatasets(datasets, periods=PERIOD, savePath=None):
     fig, axes = plt.subplots(2, 4, figsize=(16, 6))
     colors = plt.cm.tab10(range(10))  # up to 10 different cluster colors
@@ -37,7 +37,7 @@ def plotDatasets(datasets, periods=PERIOD, savePath=None):
                        alpha=0.6,
                        label=f'Cluster {clusterIdx} (null)' if col == 0 else '')
 
-        ax.set_title(f'φ={PHI_LEVELS[col]}', fontsize=11, fontweight='bold')
+        ax.set_title(f'phi={PHI_LEVELS[col]}', fontsize=11, fontweight='bold')
         ax.axhline(y=0, color='k', linestyle='--', alpha=0.3, linewidth=0.5)
         if col == 0:
             ax.set_ylabel('Vary Time Dep', fontweight='bold')
@@ -74,7 +74,7 @@ def plotDatasets(datasets, periods=PERIOD, savePath=None):
                        alpha=0.6,
                        label=f'Cluster {clusterIdx} (null)' if col == 0 else '')
 
-        ax.set_title(f'ρ={RHO_LEVELS[col]}', fontsize=11, fontweight='bold')
+        ax.set_title(f'rho={RHO_LEVELS[col]}', fontsize=11, fontweight='bold')
         ax.axhline(y=0, color='k', linestyle='--', alpha=0.3, linewidth=0.5)
         if col == 0:
             ax.set_ylabel('Vary Cluster Corr', fontweight='bold')
@@ -86,7 +86,7 @@ def plotDatasets(datasets, periods=PERIOD, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -108,7 +108,7 @@ def plotFWERvsDependence(allResults, savePath=None):
         ax1.plot(phis, fwers, marker='o', label=method, color=colors[method], linewidth=2)
 
     ax1.axhline(y=0.05, color='red', linestyle='--', label='Nominal 5%', linewidth=2)
-    ax1.set_xlabel('Time Dependence (φ)', fontsize=12)
+    ax1.set_xlabel('Time Dependence (phi)', fontsize=12)
     ax1.set_ylabel('FWER', fontsize=12)
     ax1.set_title('FWER vs Time Dependence', fontweight='bold')
     ax1.legend()
@@ -126,7 +126,7 @@ def plotFWERvsDependence(allResults, savePath=None):
         ax2.plot(rhos, fwers, marker='o', label=method, color=colors[method], linewidth=2)
 
     ax2.axhline(y=0.05, color='red', linestyle='--', label='Nominal 5%', linewidth=2)
-    ax2.set_xlabel('Cross-Sectional Correlation (ρ)', fontsize=12)
+    ax2.set_xlabel('Cross-Sectional Correlation (rho)', fontsize=12)
     ax2.set_ylabel('FWER', fontsize=12)
     ax2.set_title('FWER vs Correlation', fontweight='bold')
     ax2.legend()
@@ -138,7 +138,7 @@ def plotFWERvsDependence(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -159,7 +159,7 @@ def plotPowerVsDependence(allResults, savePath=None):
         ax1.plot(phis, powers, marker='o', label=method,
                 color=colors[method], linewidth=2, markersize=8)
 
-    ax1.set_xlabel('Time Dependence (φ)', fontsize=12)
+    ax1.set_xlabel('Time Dependence (phi)', fontsize=12)
     ax1.set_ylabel('Power', fontsize=12)
     ax1.set_title('Power vs Time Dependence', fontweight='bold')
     ax1.legend()
@@ -177,7 +177,7 @@ def plotPowerVsDependence(allResults, savePath=None):
         ax2.plot(rhos, powers, marker='o', label=method,
                 color=colors[method], linewidth=2, markersize=8)
 
-    ax2.set_xlabel('Cross-Sectional Correlation (ρ)', fontsize=12)
+    ax2.set_xlabel('Cross-Sectional Correlation (rho)', fontsize=12)
     ax2.set_ylabel('Power', fontsize=12)
     ax2.set_title('Power vs Correlation', fontweight='bold')
     ax2.legend()
@@ -189,7 +189,7 @@ def plotPowerVsDependence(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -224,11 +224,11 @@ def plotFWERvsPowerDetailed(allResults, savePath=None):
         rhoFWER_jittered = np.array(rhoFWER) + np.random.uniform(-jitterX, jitterX, len(rhoFWER))
         rhoPower_jittered = np.array(rhoPower) + np.random.uniform(-jitterY, jitterY, len(rhoPower))
 
-        ax.scatter(phiFWER_jittered, phiPower_jittered, label=f'{method} (vary φ)',
+        ax.scatter(phiFWER_jittered, phiPower_jittered, label=f'{method} (vary phi)',
                   color=colors[method], marker='o', s=100,
                   alpha=0.7, edgecolors='black', linewidth=1.5)
 
-        ax.scatter(rhoFWER_jittered, rhoPower_jittered, label=f'{method} (vary ρ)',
+        ax.scatter(rhoFWER_jittered, rhoPower_jittered, label=f'{method} (vary rho)',
                   color=colors[method], marker='s', s=100,
                   alpha=0.7, edgecolors='black', linewidth=1.5)
 
@@ -239,7 +239,7 @@ def plotFWERvsPowerDetailed(allResults, savePath=None):
 
     ax.set_xlabel('FWER (Family-Wise Error Rate)', fontsize=12, fontweight='bold')
     ax.set_ylabel('Power (True Positive Rate)', fontsize=12, fontweight='bold')
-    ax.set_title('Error Control vs Power Trade-off\n(circles=vary φ, squares=vary ρ)',
+    ax.set_title('Error Control vs Power Trade-off\n(circles=vary phi, squares=vary rho)',
                  fontweight='bold', fontsize=14)
     ax.legend(loc='best', fontsize=8, ncol=2)
     ax.grid(alpha=0.3)
@@ -250,7 +250,7 @@ def plotFWERvsPowerDetailed(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -288,7 +288,7 @@ def plotFWERvsDependenceWithBootstrap(allResults, savePath=None):
                 color=colors[method], linewidth=linewidths[method])
 
     ax1.axhline(y=0.05, color='red', linestyle='--', label='Nominal 5%', linewidth=2)
-    ax1.set_xlabel('Time Dependence (φ)', fontsize=12)
+    ax1.set_xlabel('Time Dependence (phi)', fontsize=12)
     ax1.set_ylabel('FWER', fontsize=12)
     ax1.set_title('FWER vs Time Dependence', fontweight='bold')
     ax1.legend()
@@ -307,7 +307,7 @@ def plotFWERvsDependenceWithBootstrap(allResults, savePath=None):
                 color=colors[method], linewidth=linewidths[method])
 
     ax2.axhline(y=0.05, color='red', linestyle='--', label='Nominal 5%', linewidth=2)
-    ax2.set_xlabel('Cross-Sectional Correlation (ρ)', fontsize=12)
+    ax2.set_xlabel('Cross-Sectional Correlation (rho)', fontsize=12)
     ax2.set_ylabel('FWER', fontsize=12)
     ax2.set_title('FWER vs Correlation', fontweight='bold')
     ax2.legend()
@@ -319,7 +319,7 @@ def plotFWERvsDependenceWithBootstrap(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -345,7 +345,7 @@ def plotPowerVsDependenceWithBootstrap(allResults, savePath=None):
 
         ax1.plot(phis, powers, marker='o', label=method, color=colors[method], linewidth=2)
 
-    ax1.set_xlabel('Time Dependence (φ)', fontsize=12)
+    ax1.set_xlabel('Time Dependence (phi)', fontsize=12)
     ax1.set_ylabel('Power', fontsize=12)
     ax1.set_title('Power vs Time Dependence', fontweight='bold')
     ax1.legend()
@@ -362,7 +362,7 @@ def plotPowerVsDependenceWithBootstrap(allResults, savePath=None):
 
         ax2.plot(rhos, powers, marker='o', label=method, color=colors[method], linewidth=2)
 
-    ax2.set_xlabel('Cross-Sectional Correlation (ρ)', fontsize=12)
+    ax2.set_xlabel('Cross-Sectional Correlation (rho)', fontsize=12)
     ax2.set_ylabel('Power', fontsize=12)
     ax2.set_title('Power vs Correlation', fontweight='bold')
     ax2.legend()
@@ -374,7 +374,7 @@ def plotPowerVsDependenceWithBootstrap(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -415,11 +415,11 @@ def plotFWERvsPowerWithBootstrap(allResults, savePath=None):
         rhoFWER_j = np.array(rhoFWER) + np.random.uniform(-jitterX, jitterX, len(rhoFWER))
         rhoPower_j = np.array(rhoPower) + np.random.uniform(-jitterY, jitterY, len(rhoPower))
 
-        ax.scatter(phiFWER_j, phiPower_j, label=f'{method} (vary φ)',
+        ax.scatter(phiFWER_j, phiPower_j, label=f'{method} (vary phi)',
                   color=colors[method], marker='o', s=100,
                   alpha=0.7, edgecolors='black', linewidth=1.5)
 
-        ax.scatter(rhoFWER_j, rhoPower_j, label=f'{method} (vary ρ)',
+        ax.scatter(rhoFWER_j, rhoPower_j, label=f'{method} (vary rho)',
                   color=colors[method], marker='s', s=100,
                   alpha=0.7, edgecolors='black', linewidth=1.5)
 
@@ -429,7 +429,7 @@ def plotFWERvsPowerWithBootstrap(allResults, savePath=None):
 
     ax.set_xlabel('FWER (Family-Wise Error Rate)', fontsize=12, fontweight='bold')
     ax.set_ylabel('Power (True Positive Rate)', fontsize=12, fontweight='bold')
-    ax.set_title('Error Control vs Power Trade-off\n(circles=vary φ, squares=vary ρ)',
+    ax.set_title('Error Control vs Power Trade-off\n(circles=vary phi, squares=vary rho)',
                  fontweight='bold', fontsize=14)
     ax.legend(loc='best', fontsize=8, ncol=2)
     ax.grid(alpha=0.3)
@@ -440,7 +440,7 @@ def plotFWERvsPowerWithBootstrap(allResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
@@ -508,7 +508,7 @@ def plotCalibrationCurves(calibrationResults, savePath=None):
 
     if savePath:
         plt.savefig(savePath, dpi=300, bbox_inches='tight')
-        print(f"✓ Plot saved: {savePath}")
+        print(f"Plot saved: {savePath}")
         plt.close(fig)
     else:
         plt.show()
